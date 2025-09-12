@@ -15,13 +15,13 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => {
-                        console.log('Service Worker registrado con éxito:', registration);
+                        console.log('Service Worker registrado con ��xito:', registration);
                         registration.addEventListener('updatefound', () => {
                             const installingWorker = registration.installing;
                             installingWorker.addEventListener('statechange', () => {
                                 if (installingWorker.state === 'installed') {
                                     if (navigator.serviceWorker.controller) {
-                                        console.log('Nuevo contenido disponible, recargando página...');
+                                        console.log('Nuevo contenido disponible, recargando p��gina...');
                                         window.location.reload();
                                     }
                                 }
@@ -36,50 +36,50 @@
     </script>
 </head>
 <body>
-    <h1>📚 Flashcards de Idiomas</h1>
+    <h1>?? Flashcards de Idiomas</h1>
     <div id="fileName"></div>
     
     <div id="installMessage" style="display:none; text-align:center; margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-        <span>¡Mejor experiencia si la instalas! 🚀</span>
-        Pulsa el botón de instalación en tu navegador para usarla sin conexión y con la pantalla apagada.
+        <span>?Mejor experiencia si la instalas! ??</span>
+        <button id="installBtn">Instalar</button>
     </div>
 
     <div id="flashcard">
         <div id="counter"></div>
         <div id="intro">
-            Bienvenido a la aplicación de <b>flashcards interactivas</b>.<br><br>
-            1️⃣ Carga un archivo JSON con frases en distintos idiomas.<br>
-            2️⃣ Selecciona el idioma a estudiar y el idioma de traducción.<br>
-            3️⃣ Ajusta velocidad 🎵, pausa ⏱️ y visibilidad de la traducción 👁️.<br>
-            4️⃣ El texto y el audio se reproducirán automáticamente.<br><br>
-            Usa ↻ para reiniciar desde el principio cuando quieras.
+            Bienvenido a la aplicaci��n de <b>flashcards interactivas</b>.<br><br>
+            1?? Carga un archivo JSON con frases en distintos idiomas.<br>
+            2?? Selecciona el idioma a estudiar y el idioma de traducci��n.<br>
+            3?? Ajusta velocidad ??, pausa ?? y visibilidad de la traducci��n ???.<br>
+            4?? El texto y el audio se reproducir��n autom��ticamente.<br><br>
+            Usa ? para reiniciar desde el principio cuando quieras.
         </div>
 
         <div id="phrase"></div>
         <div id="translation"></div>
 
-        <button id="fsBtn" class="floating-btn" title="Pantalla completa">⛶</button>
-        <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">▶</button>
-        <button id="restartBtn" class="floating-btn" title="Reiniciar">↻</button>
+        <button id="fsBtn" class="floating-btn" title="Pantalla completa">?</button>
+        <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">?</button>
+        <button id="restartBtn" class="floating-btn" title="Reiniciar">?</button>
     </div>
 
     <div id="error"></div>
 
     <div id="controls-container" class="controls-container">
         <div class="controls-row">
-            <button onclick="document.getElementById('fileInput').click()">📂 Cargar Lista</button>
+            <button onclick="document.getElementById('fileInput').click()">?? Cargar Lista</button>
             <input type="file" id="fileInput" style="display:none" accept="application/json">
-            <a href="https://papaya-biscochitos-59af42.netlify.app/" class="button" target="_blank" rel="noopener noreferrer">✍️ Generar Lista</a>
-            <button id="wakeLockBtn" title="Bloquear pantalla" data-active="false">🔒</button>
+            <a href="https://papaya-biscochitos-59af42.netlify.app/" class="button" target="_blank" rel="noopener noreferrer">?? Generar Lista</a>
+            <button id="wakeLockBtn" title="Bloquear pantalla" data-active="false">??</button>
 
-            <label>🎯 Estudiar:
+            <label>?? Estudiar:
                 <select id="studyLang"></select>
             </label>
-            <label id="studyVoiceLabel" style="display: none;">🗣️ Voz:
+            <label id="studyVoiceLabel" style="display: none;">??? Voz:
                 <select id="studyVoice"></select>
             </label>
 
-            <label>🔁 Repeticiones:
+            <label>?? Repeticiones:
                 <select id="repeatCount">
                     <option value="1">1</option>
                     <option value="2" selected>2</option>
@@ -89,17 +89,17 @@
                 </select>
             </label>
             
-            <label>🎵 Velocidad:
+            <label>?? Velocidad:
                 <select id="speed">
                     <option value="0.6">Muy lenta</option>
                     <option value="0.8">Lenta</option>
                     <option value="1">Normal</option>
-                    <option value="1.2" selected>Rápida</option>
-                    <option value="1.5">Muy rápida</option>
+                    <option value="1.2" selected>R��pida</option>
+                    <option value="1.5">Muy r��pida</option>
                 </select>
             </label>
             
-            <label>⏱️ Pausa (s):
+            <label>?? Pausa (s):
                 <select id="pause">
                     <option value="0.5">0.5</option>
                     <option value="1" selected>1</option>
@@ -109,22 +109,22 @@
                 </select>
             </label>
 
-            <label id="transLangLabel">🌍 Traducir a:
+            <label id="transLangLabel">?? Traducir a:
                 <select id="transLang"></select>
             </label>
-            <label id="transVoiceLabel" style="display: none;">🗣️ Voz:
+            <label id="transVoiceLabel" style="display: none;">??? Voz:
                 <select id="transVoice"></select>
             </label>
             
-            <label>👁️
+            <label>???
                 <input type="checkbox" id="showTransCheck" checked>
-                Mostrar traducción
+                Mostrar traducci��n
             </label>
         </div>
     </div>
     
-    <div id="footer">Autor: Diego Cuaran | Última modificación:
-        <script>document.write(document.lastModified)</script> | © 2025 copyright
+    <div id="footer">Autor: Diego Cuaran | ��ltima modificaci��n:
+        <script>document.write(document.lastModified)</script> | ? 2025 copyright
     </div>
     
     <script src="script.js"></script>
