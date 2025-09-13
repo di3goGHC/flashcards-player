@@ -3,7 +3,7 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
         title: 'Flashcards de Idiomas',
         artist: 'Diego Cuaran',
-        album: 'Tu álbum de frases',
+        album: 'Tu álbum de frases a estudiar',
         artwork: [
             { src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
         ]
