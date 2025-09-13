@@ -40,6 +40,7 @@ let isPaused = false;
 let wakeLock = null;
 let floatingBtnTimer = null;
 let alternateStudyVoice = null; // Variable para almacenar la voz de alternancia
+let fileName = null; // Variable para guardar el nombre del archivo
 
 const phraseEl = document.getElementById('phrase');
 const transEl = document.getElementById('translation');
@@ -219,13 +220,18 @@ async function renderAndPlay(){
 document.getElementById('fileInput').addEventListener('change', (e)=>{
     const file = e.target.files[0];
     if(!file) return;
-    fileNameEl.textContent = "📂 Archivo cargado: " + file.name;
+    fileName = file.name;
+    fileNameEl.textContent = "📂 Archivo cargado: " + fileName;
+    fileNameEl.classList.add('file-loaded');
+    
     const reader = new FileReader();
     reader.onload = (ev)=>{
         try{
             const json = JSON.parse(ev.target.result);
             if(!Array.isArray(json) || !json.length || typeof json[0]!=='object') throw 'Formato inválido';
-            flashcards = json; index=0; errorEl.textContent='';
+            flashcards = json; 
+            index = 0; // Reinicia el índice al cargar un nuevo archivo
+            errorEl.textContent='';
             setupSelectors();
             restartBtn.disabled=false;
             introEl.style.display="none";
@@ -525,12 +531,18 @@ function saveState() {
 function loadState() {
     const savedIndex = localStorage.getItem('flashcardsIndex');
     const savedFsState = localStorage.getItem('flashcardsIsFullscreen');
+    const savedFileName = localStorage.getItem('lastLoadedFile');
+
+    if (savedFileName) {
+        fileNameEl.textContent = "📂 Último archivo cargado: " + savedFileName;
+        fileNameEl.classList.add('file-loaded');
+        // Nota: La aplicación no puede volver a cargar el archivo local automáticamente
+        // por razones de seguridad, el usuario debe cargarlo de nuevo.
+    }
 
     if (savedIndex !== null) {
-        // Asumiendo que las flashcards se cargan primero, esto recupera el último índice.
-        // La lógica para recargar el archivo JSON completo y los demás settings es más compleja
-        // y requiere que el usuario cargue el archivo de nuevo.
         index = parseInt(savedIndex, 10);
+        // Si hay un índice guardado, se mostrará la tarjeta correcta cuando se cargue el archivo
     }
     
     if (savedFsState === 'true') {
