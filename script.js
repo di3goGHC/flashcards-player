@@ -235,6 +235,7 @@ document.getElementById('fileInput').addEventListener('change', (e)=>{
             wakeLockBtn.textContent = '🔓';
             wakeLockBtn.title = 'Desbloquear pantalla';
             renderAndPlay();
+            saveState(); // Guarda el estado inicial
         }catch(err){ errorEl.textContent='Error al leer JSON: '+err; }
     };
     reader.readAsText(file);
@@ -399,6 +400,7 @@ const togglePause = () => {
         floatingPauseBtn.classList.add('visible');
         fsBtn.classList.add('visible');
         restartBtn.classList.add('visible');
+        saveState(); // Guarda el estado al pausar
     } else {
         floatingPauseBtn.textContent = '❚❚';
         showFloatingButtons(); 
@@ -483,8 +485,12 @@ async function exitFullscreen(){
 
 fsBtn.addEventListener('click', async (e)=>{
     e.stopPropagation();
-    if (isFullscreenActive()) await exitFullscreen();
-    else await enterFullscreen(flashcardEl);
+    if (isFullscreenActive()) {
+        await exitFullscreen();
+    } else {
+        await enterFullscreen(flashcardEl);
+    }
+    saveState(); // Guarda el estado de la pantalla completa
 });
 
 ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt=>{
@@ -507,3 +513,33 @@ showTransCheck.addEventListener('change', () => {
 studyVoiceSel.addEventListener('change', () => {
     renderAndPlay();
 });
+
+// Funciones para guardar y cargar el estado
+function saveState() {
+    if (flashcards.length > 0) {
+        localStorage.setItem('flashcardsIndex', index);
+        localStorage.setItem('flashcardsIsFullscreen', isFullscreenActive());
+    }
+}
+
+function loadState() {
+    const savedIndex = localStorage.getItem('flashcardsIndex');
+    const savedFsState = localStorage.getItem('flashcardsIsFullscreen');
+
+    if (savedIndex !== null) {
+        // Asumiendo que las flashcards se cargan primero, esto recupera el último índice.
+        // La lógica para recargar el archivo JSON completo y los demás settings es más compleja
+        // y requiere que el usuario cargue el archivo de nuevo.
+        index = parseInt(savedIndex, 10);
+    }
+    
+    if (savedFsState === 'true') {
+        enterFullscreen(flashcardEl);
+    }
+}
+
+// Event listener para guardar el estado al cerrar/salir de la página
+window.addEventListener('beforeunload', saveState);
+
+// Event listener para cargar el estado al iniciar
+document.addEventListener('DOMContentLoaded', loadState);
