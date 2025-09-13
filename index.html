@@ -1,132 +1,132 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashcards de Idiomas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards de Idiomas</title>
 
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="styles.css">
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(registration => {
-                        console.log('Service Worker registrado con 茅xito:', registration);
-                        registration.addEventListener('updatefound', () => {
-                            const installingWorker = registration.installing;
-                            installingWorker.addEventListener('statechange', () => {
-                                if (installingWorker.state === 'installed') {
-                                    if (navigator.serviceWorker.controller) {
-                                        console.log('Nuevo contenido disponible, recargando p谩gina...');
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Fallo en el registro del Service Worker:', error);
-                    });
-            });
-        }
-    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado con éxito:', registration);
+                        registration.addEventListener('updatefound', () => {
+                            const installingWorker = registration.installing;
+                            installingWorker.addEventListener('statechange', () => {
+                                if (installingWorker.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        console.log('Nuevo contenido disponible, recargando página...');
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Fallo en el registro del Service Worker:', error);
+                    });
+            });
+        }
+    </script>
 </head>
 <body>
-    <h1>馃摎 Flashcards de Idiomas</h1>
-    <div id="fileName"></div>
-    
-    <div id="installMessage" style="display:none; text-align:center; margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-        <span>隆Mejor experiencia si la instalas! 馃殌</span>
-        Pulsa el bot贸n de instalaci贸n en tu navegador para usarla sin conexi贸n y con la pantalla apagada.
-    </div>
+    <h1>📖 Flashcards de Idiomas</h1>
+    <div id="fileName"></div>
+    
+    <div id="installMessage" style="display:none; text-align:center; margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        <span>¡Mejor experiencia si la instalas! 📲</span>
+        Pulsa el botón de instalación en tu navegador para usarla sin conexión y con la pantalla apagada.
+    </div>
 
-    <div id="flashcard">
-        <div id="counter"></div>
-        <div id="intro">
-            Bienvenido a la aplicaci贸n de <b>flashcards interactivas</b>.<br><br>
-            1锔忊儯 Carga un archivo JSON con frases en distintos idiomas.<br>
-            2锔忊儯 Selecciona el idioma a estudiar y el idioma de traducci贸n.<br>
-            3锔忊儯 Ajusta velocidad 馃幍, pausa 鈴憋笍 y visibilidad de la traducci贸n 馃憗锔?<br>
-            4锔忊儯 El texto y el audio se reproducir谩n autom谩ticamente.<br><br>
-            Usa 鈫?para reiniciar desde el principio cuando quieras.
-        </div>
+    <div id="flashcard">
+        <div id="counter"></div>
+        <div id="intro">
+            Bienvenido a la aplicación de <b>flashcards interactivas</b>.<br><br>
+            1️⃣ Carga un archivo JSON con frases en distintos idiomas.<br>
+            2️⃣ Selecciona el idioma a estudiar y el idioma de traducción.<br>
+            3️⃣ Ajusta velocidad 🎧, pausa ⏸️ y visibilidad de la traducción 👆🏻.<br>
+            4️⃣ El texto y el audio se reproducirán automáticamente.<br><br>
+            Usa 🔄 para reiniciar desde el principio cuando quieras.
+        </div>
 
-        <div id="phrase"></div>
-        <div id="translation"></div>
+        <div id="phrase"></div>
+        <div id="translation"></div>
 
-        <button id="fsBtn" class="floating-btn" title="Pantalla completa">鉀?/button>
-        <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">鈻?/button>
-        <button id="restartBtn" class="floating-btn" title="Reiniciar">鈫?/button>
-    </div>
+        <button id="fsBtn" class="floating-btn" title="Pantalla completa">🗖</button>
+        <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">▶️</button>
+        <button id="restartBtn" class="floating-btn" title="Reiniciar">🔄</button>
+    </div>
 
-    <div id="error"></div>
+    <div id="error"></div>
 
-    <div id="controls-container" class="controls-container">
-        <div class="controls-row">
-            <button onclick="document.getElementById('fileInput').click()">馃搨 Cargar Lista</button>
-            <input type="file" id="fileInput" style="display:none" accept="application/json">
-            <a href="https://papaya-biscochitos-59af42.netlify.app/" class="button" target="_blank" rel="noopener noreferrer">鉁嶏笍 Generar Lista</a>
-            <button id="wakeLockBtn" title="Bloquear pantalla" data-active="false">馃敀</button>
+    <div id="controls-container" class="controls-container">
+        <div class="controls-row">
+            <button onclick="document.getElementById('fileInput').click()">📁 Cargar Lista</button>
+            <input type="file" id="fileInput" style="display:none" accept="application/json">
+            <a href="https://papaya-biscochitos-59af42.netlify.app/" class="button" target="_blank" rel="noopener noreferrer">➕ Generar Lista</a>
+            <button id="wakeLockBtn" title="Bloquear pantalla" data-active="false">💡</button>
 
-            <label>馃幆 Estudiar:
-                <select id="studyLang"></select>
-            </label>
-            <label id="studyVoiceLabel" style="display: none;">馃棧锔?Voz:
-                <select id="studyVoice"></select>
-            </label>
+            <label>▶️ Estudiar:
+                <select id="studyLang"></select>
+            </label>
+            <label id="studyVoiceLabel" style="display: none;">🎙️ Voz:
+                <select id="studyVoice"></select>
+            </label>
 
-            <label>馃攣 Repeticiones:
-                <select id="repeatCount">
-                    <option value="1">1</option>
-                    <option value="2" selected>2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                </select>
-            </label>
-            
-            <label>馃幍 Velocidad:
-                <select id="speed">
-                    <option value="0.6">Muy lenta</option>
-                    <option value="0.8">Lenta</option>
-                    <option value="1">Normal</option>
-                    <option value="1.2" selected>R谩pida</option>
-                    <option value="1.5">Muy r谩pida</option>
-                </select>
-            </label>
-            
-            <label>鈴憋笍 Pausa (s):
-                <select id="pause">
-                    <option value="0.5" selected>0.5</option>
-                    <option value="1">1</option>
-                    <option value="1.5">1.5</option>
-                    <option value="2">2</option>
-                    <option value="2.5">2.5</option>
-                </select>
-            </label>
+            <label>🔁 Repeticiones:
+                <select id="repeatCount">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </label>
+            
+            <label>🎧 Velocidad:
+                <select id="speed">
+                    <option value="0.6">Muy lenta</option>
+                    <option value="0.8">Lenta</option>
+                    <option value="1">Normal</option>
+                    <option value="1.2" selected>Rápida</option>
+                    <option value="1.5">Muy rápida</option>
+                </select>
+            </label>
+            
+            <label>⏸️ Pausa (s):
+                <select id="pause">
+                    <option value="0.5" selected>0.5</option>
+                    <option value="1">1</option>
+                    <option value="1.5">1.5</option>
+                    <option value="2">2</option>
+                    <option value="2.5">2.5</option>
+                </select>
+            </label>
 
-            <label id="transLangLabel">馃實 Traducir a:
-                <select id="transLang"></select>
-            </label>
-            <label id="transVoiceLabel" style="display: none;">馃棧锔?Voz:
-                <select id="transVoice"></select>
-            </label>
-            
-            <label>馃憗锔?
-                <input type="checkbox" id="showTransCheck" checked>
-                Mostrar traducci贸n
-            </label>
-        </div>
-    </div>
-    
-    <div id="footer">Autor: Diego Cuaran | 脷ltima modificaci贸n:
-        <script>document.write(document.lastModified)</script> | 漏 2025 copyright
-    </div>
-    
-    <script src="script.js"></script>
+            <label id="transLangLabel">📚 Traducir a:
+                <select id="transLang"></select>
+            </label>
+            <label id="transVoiceLabel" style="display: none;">🎙️ Voz:
+                <select id="transVoice"></select>
+            </label>
+            
+            <label>👆🏻
+                <input type="checkbox" id="showTransCheck" checked>
+                Mostrar traducción
+            </label>
+        </div>
+    </div>
+    
+    <div id="footer">Autor: Diego Cuaran | Última modificación:
+        <script>document.write(document.lastModified)</script> | © 2025 copyright
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
