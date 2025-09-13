@@ -1,202 +1,112 @@
+* { box-sizing: border-box; }
 body {
-    background-color: #212121;
-    color: #f0f0f0;
     font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-}
-
-#flashcard-container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    position: relative;
     padding: 20px;
 }
-
-#flashcard {
-    background-color: #333;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    text-align: center;
-    width: 90%;
-    max-width: 600px;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    transition: transform 0.5s ease;
-}
-
-#phrase {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #fff;
-    margin: 0 0 10px 0;
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-}
-
-#translation {
-    font-size: 1.5rem;
-    color: #ccc;
-    margin: 0;
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-}
-
-.welcome-title {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    color: #fff;
-}
-
-.menu-container {
-    background-color: #2a2a2a;
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-.menu-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.file-info-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    flex-grow: 1;
-}
-
-#fileInput {
-    display: none;
-}
-
-#fileName {
-    font-size: 0.9em;
-    color: #aaa;
-    margin-top: 5px;
-    cursor: pointer;
-    background-color: #3e3e3e;
-    padding: 8px 12px;
-    border-radius: 6px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 250px;
-    box-sizing: border-box;
-}
-
-#fileName::before {
-    content: 'Cargar archivo JSON';
-    color: #fff;
-}
-
-#fileName.file-loaded::before {
-    content: '';
-}
-
-.menu-btn {
-    width: 40px;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    font-size: 20px;
-    cursor: pointer;
-    border-radius: 8px;
-    margin-right: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.2s;
-}
-
-.menu-btn:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-#wakeLockBtn {
-    font-size: 20px;
-}
-
-#settings-menu {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.control-row {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 150px;
-}
-
-label {
-    font-size: 0.9rem;
-    color: #ccc;
-}
-
-select {
-    background-color: #3e3e3e;
-    color: #fff;
-    border: 1px solid #555;
-    border-radius: 4px;
-    padding: 6px;
-}
-
-input[type="checkbox"] {
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background-color: #555;
-    border-radius: 4px;
+h1 { margin: 10px; text-align: center; }
+#flashcard-container {
     position: relative;
-    cursor: pointer;
+    width: 100%;
+    max-width: 650px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
-
-input[type="checkbox"]:checked {
-    background-color: #3c96ff;
-}
-
-input[type="checkbox"]:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 16px;
-}
-
-#app-footer {
-    padding: 15px;
+#flashcard {
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px;
+    width: 90%;
+    max-width: 650px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.5s ease;
     text-align: center;
-    background-color: #2a2a2a;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
+}
+#phrase, #translation, #intro {
+    opacity: 0;
+    transition: opacity 0.6s, transform 0.6s;
+    word-break: break-word;  
+    text-align: center;
+}
+#phrase {
+    color: #e53935;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+#translation {
+    color: #87CEFA;
+    margin-top: 12px;
+    font-size: 1.3rem;
+}
+#intro {
+    opacity: 1;
+    transform: scale(1);
+    color: #444;
+    font-size: 1.0rem;
+    line-height: 1.4;
+    max-width: 90%;
 }
 
+.controls-container {
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 700px;
+}
+.controls-row {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+#controls-container label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+}
+#transLangLabel {
+    color: #000;
+}
+select, input[type="checkbox"], button, a.button {
+    padding: 6px 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
 #counter {
-    font-size: 1rem;
-    color: #aaa;
-    margin: 0;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #555;
 }
-
-.error-msg {
-    color: #ff6b6b;
-    font-size: 1rem;
-    margin: 0;
+#error { color: red; font-weight: bold; margin-top: 10px; }
+#fileName {
+    margin: 5px;
+    font-size: 14px;
+    color: #0000FF;
+    font-weight: normal;
 }
+#footer { margin-top: 15px; font-size: 14px; text-align: center; color: #444; }
 
 /* Estilo para el contenedor de los botones flotantes */
 .floating-buttons-container {
@@ -214,7 +124,7 @@ input[type="checkbox"]:checked::after {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.2);
+    background-color: rgba(60, 150, 255, 0.75);
     border: none;
     color: white;
     font-size: 24px;
@@ -234,28 +144,74 @@ input[type="checkbox"]:checked::after {
 #floatingPauseBtn {
     background-color: rgba(60, 150, 255, 0.75);
 }
-
-.restart-btn {
+#restartBtn {
     font-size: 20px;
 }
-
-.fs-btn {
+#fsBtn {
     font-size: 22px;
+}
+#fsBtn, #restartBtn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #666;
+}
+
+#fsBtn.visible, #restartBtn.visible {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
 }
 
 /* Estilo para el modo de pantalla completa */
 #flashcard-container:-webkit-full-screen {
     background-color: #212121;
 }
-
 #flashcard-container:-moz-full-screen {
     background-color: #212121;
 }
-
 #flashcard-container:-ms-fullscreen {
     background-color: #212121;
 }
-
 #flashcard-container:fullscreen {
     background-color: #212121;
+}
+
+@media (max-width: 768px) {
+    #flashcard {
+        width: 95%;
+        min-height: 160px;
+        padding: 20px;
+    }
+    #phrase { font-size: 1.5rem; }
+    #translation { font-size: 1.1rem; }
+    #intro { font-size: 0.95rem; }
+    .controls-row {
+        flex-direction: column;
+    }
+}
+@media (orientation: landscape) and (max-width: 1024px) {
+    #flashcard {
+        width: 85%;
+        min-height: 140px;
+        padding: 18px;
+    }
+}
+
+/* Reducimos el ancho de los desplegables de texto */
+#studyLang, #studyVoice, #transLang, #transVoice, #repeatCount, #pause {
+    max-width: 120px;
+}
+#speed {
+    max-width: 85px;
+}
+
+/* Estilos para el estado de los botones flotantes */
+.floating-btn:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+#floatingPauseBtn:hover {
+    background-color: rgba(60, 150, 255, 0.9);
+}
+#floatingPauseBtn.visible, #restartBtn.visible, #fsBtn.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0);
 }

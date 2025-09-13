@@ -3,111 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#212121" />
-    <link rel="stylesheet" href="styles.css">
+    <title>Flashcards de Idiomas</title>
+
     <link rel="manifest" href="manifest.json">
-    <title>Flashcards Player</title>
-</head>
-<body>
-    <div class="menu-container">
-        <div class="menu-top">
-            <button id="wakeLockBtn" class="menu-btn" title="Desactivar bloqueo de pantalla" data-active="true">??</button>
-            <div class="file-info-container">
-                <input type="file" id="fileInput" accept=".json">
-                <span id="fileName"></span>
-            </div>
-            <a href="https://github.com/di3goGHC/flashcards-player" class="menu-btn github-btn" target="_blank" title="Ver en GitHub">
-                <img src="/icons/github-icon.svg" alt="GitHub" style="width: 24px;">
-            </a>
-        </div>
-        <div id="settings-menu">
-            <div class="control-row">
-                <label for="studyLang">Idioma de estudio:</label>
-                <select id="studyLang"></select>
-            </div>
-            <div class="control-row" id="studyVoiceLabel" style="display:none;">
-                <label for="studyVoice">Voz de estudio:</label>
-                <select id="studyVoice"></select>
-            </div>
-            <div class="control-row">
-                <label for="transLang">Idioma de traducci車n:</label>
-                <select id="transLang"></select>
-            </div>
-            <div class="control-row" id="transVoiceLabel" style="display:none;">
-                <label for="transVoice">Voz de traducci車n:</label>
-                <select id="transVoice"></select>
-            </div>
-            <div class="control-row">
-                <label for="repeatCount">Repeticiones:</label>
-                <select id="repeatCount">
-                    <option value="1">1</option>
-                    <option value="2" selected>2</option>
-                    <option value="3">3</option>
-                </select>
-            </div>
-            <div class="control-row">
-                <label for="speed">Velocidad:</label>
-                <select id="speed">
-                    <option value="0.75">0.75x</option>
-                    <option value="1" selected>1x</option>
-                    <option value="1.25">1.25x</option>
-                    <option value="1.5">1.5x</option>
-                </select>
-            </div>
-            <div class="control-row">
-                <label for="pause">Pausa entre tarjetas (seg):</label>
-                <select id="pause">
-                    <option value="1">1</option>
-                    <option value="2" selected>2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                </select>
-            </div>
-            <div class="control-row">
-                <label for="showTransCheck">Mostrar traducci車n:</label>
-                <input type="checkbox" id="showTransCheck" checked>
-            </div>
-        </div>
-    </div>
-    
-    <div id="flashcard-container">
-        <div id="flashcard" class="card">
-            <h2 id="phrase"></h2>
-            <p id="translation"></p>
-            <div id="intro">
-                <h1 class="welcome-title">Bienvenido a Flashcards Player</h1>
-                <p>Selecciona un archivo JSON para empezar a estudiar.</p>
-                <div id="installMessage">
-                    <p>?A?ade esta app a tu pantalla de inicio para una mejor experiencia!</p>
-                </div>
-            </div>
-        </div>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="styles.css">
 
-        <div class="floating-buttons-container">
-            <button id="floatingPauseBtn" class="floating-btn">??</button>
-            <button id="fsBtn" class="floating-btn fs-btn">?</button>
-            <button id="restartBtn" class="floating-btn restart-btn">?</button>
-        </div>
-    </div>
-
-    <div id="app-footer">
-        <p id="counter"></p>
-        <p id="error" class="error-msg"></p>
-    </div>
-
-    <script src="script.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
                     .then(registration => {
-                        console.log('SW registrado con 谷xito:', registration);
+                        console.log('Service Worker registrado con 谷xito:', registration);
+                        registration.addEventListener('updatefound', () => {
+                            const installingWorker = registration.installing;
+                            installingWorker.addEventListener('statechange', () => {
+                                if (installingWorker.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        console.log('Nuevo contenido disponible, recargando p芍gina...');
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
                     })
-                    .catch(err => {
-                        console.error('Fallo en el registro del SW:', err);
+                    .catch(error => {
+                        console.error('Fallo en el registro del Service Worker:', error);
                     });
             });
         }
     </script>
+</head>
+<body>
+    <h1>?? Flashcards de Idiomas</h1>
+    <div id="fileName"></div>
+    
+    <div id="installMessage" style="display:none; text-align:center; margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        <span>?Mejor experiencia si la instalas! ??</span>
+        Pulsa el bot車n de instalaci車n en tu navegador para usarla sin conexi車n y con la pantalla apagada.
+    </div>
+
+    <div id="flashcard-container">
+        <div id="flashcard">
+            <div id="counter"></div>
+            <div id="intro">
+                Bienvenido a la aplicaci車n de <b>flashcards interactivas</b>.<br><br>
+                1?? Carga un archivo JSON con frases en distintos idiomas.<br>
+                2?? Selecciona el idioma a estudiar y el idioma de traducci車n.<br>
+                3?? Ajusta velocidad ??, pausa ?? y visibilidad de la traducci車n ??.<br>
+                4?? El texto y el audio se reproducir芍n autom芍ticamente.<br><br>
+                Usa ?? para reiniciar desde el principio cuando quieras.
+            </div>
+
+            <div id="phrase"></div>
+            <div id="translation"></div>
+        </div>
+        
+        <div class="floating-buttons-container">
+            <button id="restartBtn" class="floating-btn" title="Reiniciar">?</button>
+            <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">??</button>
+            <button id="fsBtn" class="floating-btn" title="Pantalla completa">?</button>
+        </div>
+    </div>
+    
+    <div id="error"></div>
+
+    <div id="controls-container" class="controls-container">
+        <div class="controls-row">
+            <button onclick="document.getElementById('fileInput').click()">?? Cargar Lista</button>
+            <input type="file" id="fileInput" style="display:none" accept="application/json">
+            <a href="https://papaya-biscochitos-59af42.netlify.app/" class="button" target="_blank" rel="noopener noreferrer">? Generar Lista</a>
+            <button id="wakeLockBtn" title="Bloquear pantalla" data-active="false">??</button>
+
+            <label>?? Estudiar:
+                <select id="studyLang"></select>
+            </label>
+            <label id="studyVoiceLabel" style="display: none;">??? Voz:
+                <select id="studyVoice"></select>
+            </label>
+
+            <label>?? Repeticiones:
+                <select id="repeatCount">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </label>
+            
+            <label>?? Velocidad:
+                <select id="speed">
+                    <option value="0.6">Muy lenta</option>
+                    <option value="0.8">Lenta</option>
+                    <option value="1">Normal</option>
+                    <option value="1.2" selected>R芍pida</option>
+                    <option value="1.5">Muy r芍pida</option>
+                </select>
+            </label>
+            
+            <label>?? Pausa (s):
+                <select id="pause">
+                    <option value="0.5" selected>0.5</option>
+                    <option value="1">1</option>
+                    <option value="1.5">1.5</option>
+                    <option value="2">2</option>
+                    <option value="2.5">2.5</option>
+                </select>
+            </label>
+
+            <label id="transLangLabel">?? Traducir a:
+                <select id="transLang"></select>
+            </label>
+            <label id="transVoiceLabel" style="display: none;">??? Voz:
+                <select id="transVoice"></select>
+            </label>
+            
+            <label>??
+                <input type="checkbox" id="showTransCheck" checked>
+                Mostrar traducci車n
+            </label>
+        </div>
+    </div>
+    
+    <div id="footer">Autor: Diego Cuaran | 迆ltima modificaci車n:
+        <script>document.write(document.lastModified)</script> | ? 2025 copyright
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
