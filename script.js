@@ -3,7 +3,7 @@ if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
         title: 'Flashcards de Idiomas',
         artist: 'Diego Cuaran',
-        album: 'Tu álbum de frases a estudiar',
+        album: 'Tu álbum de frases',
         artwork: [
             { src: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
         ]
@@ -19,16 +19,12 @@ if ('mediaSession' in navigator) {
         togglePause();
     });
 
-    // Cambiamos 'nexttrack' por 'previoustrack' para que funcione como "Reiniciar"
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-        console.log('Se ha pulsado el botón de Reiniciar (desde Media Session)');
-        if(!flashcards.length) return;
-        index = 0;
-        isPaused = false;
-        floatingPauseBtn.textContent = '❚❚'; // Actualiza el icono a pausa
-        clearTimeout(waitTimer);
-        try { synth.cancel(); } catch(_) {}
-        renderAndPlay();
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+        console.log('Se ha pulsado el botón de Siguiente (desde Media Session)');
+        if (!isPaused) {
+            index = (index + 1) % flashcards.length;
+            renderAndPlay();
+        }
     });
 }
 
@@ -48,7 +44,7 @@ const studySel = document.getElementById('studyLang');
 const studyVoiceLabel = document.getElementById('studyVoiceLabel');
 const studyVoiceSel = document.getElementById('studyVoice');
 const transSel = document.getElementById('transLang');
-const transVoiceLabel = document.getElementById('transVoiceLabel');
+const transVoiceLabel = document = document.getElementById('transVoiceLabel');
 const transVoiceSel = document.getElementById('transVoice');
 const showTransChk = document.getElementById('showTransCheck');
 const repeatCountSel = document.getElementById('repeatCount');
@@ -227,7 +223,6 @@ document.getElementById('fileInput').addEventListener('change', (e)=>{
             if(!Array.isArray(json) || !json.length || typeof json[0]!=='object') throw 'Formato inválido';
             flashcards = json; index=0; errorEl.textContent='';
             setupSelectors();
-            restartBtn.disabled=false;
             introEl.style.display="none";
             // Se activa el Wake Lock por defecto
             requestWakeLock();
