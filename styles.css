@@ -1,200 +1,200 @@
 * { box-sizing: border-box; }
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
 }
 h1 { margin: 10px; text-align: center; }
 #flashcard {
-    position: relative;
-    border-radius: 12px;
-    padding: 25px;
-    margin: 20px;
-    width: 80%;
-    max-width: 650px;
-    min-height: 180px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color: #fff;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-    transition: all 0.5s ease;
-    text-align: center;
+    position: relative;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px;
+    width: 80%;
+    max-width: 650px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+    transition: all 0.5s ease;
+    text-align: center;
 }
 #phrase, #translation, #intro {
-    opacity: 0;
-    transition: opacity 0.6s, transform 0.6s;
-    word-break: break-word;  
-    text-align: center;
+    opacity: 0;
+    transition: opacity 0.6s, transform 0.6s;
+    word-break: break-word;  
+    text-align: center;
 }
 #phrase {
-    color: #e53935;
-    font-size: 1.8rem;
-    font-weight: bold;
+    color: #e53935;
+    font-size: 1.8rem;
+    font-weight: bold;
 }
 #translation {
-    color: #87CEFA;
-    margin-top: 12px;
-    font-size: 1.3rem;
+    color: #87CEFA;
+    margin-top: 12px;
+    font-size: 1.3rem;
 }
 #intro {
-    opacity: 1;
-    transform: scale(1);
-    color: #444;
-    font-size: 1.0rem;
-    line-height: 1.4;
-    max-width: 90%;
+    opacity: 1;
+    transform: scale(1);
+    color: #444;
+    font-size: 1.0rem;
+    line-height: 1.4;
+    max-width: 90%;
 }
 
 .controls-container {
-    padding: 20px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 700px;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 700px;
 }
 .controls-row {
-    display: flex;
-    flex-wrap: wrap; 
-    gap: 15px;
-    justify-content: center;
-    align-items: center;
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
 }
 #controls-container label {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
 }
 #transLangLabel {
-    color: #000;
+    color: #000;
 }
 select, input[type="checkbox"], button, a.button {
-    padding: 6px 8px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #bbb;
-    background: #fff;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
+    padding: 6px 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
 }
 #counter {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: #555;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #555;
 }
 #error { color: red; font-weight: bold; margin-top: 10px; }
 #fileName {
-    margin: 5px;
-    font-size: 14px;
-    color: #0000FF;
-    font-weight: normal;
+    margin: 5px;
+    font-size: 14px;
+    color: #0000FF;
+    font-weight: normal;
 }
 #footer { margin-top: 15px; font-size: 14px; text-align: center; color: #444; }
 
 @media (max-width: 768px) {
-    #flashcard {
-        width: 95%;
-        min-height: 160px;
-        padding: 20px;
-    }
-    #phrase { font-size: 1.5rem; }
-    #translation { font-size: 1.1rem; }
-    #intro { font-size: 0.95rem; }
-    .controls-row {
-        flex-direction: column;
-    }
+    #flashcard {
+        width: 95%;
+        min-height: 160px;
+        padding: 20px;
+    }
+    #phrase { font-size: 1.5rem; }
+    #translation { font-size: 1.1rem; }
+    #intro { font-size: 0.95rem; }
+    .controls-row {
+        flex-direction: column;
+    }
 }
 @media (orientation: landscape) and (max-width: 1024px) {
-    #flashcard {
-        width: 85%;
-        min-height: 140px;
-        padding: 18px;
-    }
+    #flashcard {
+        width: 85%;
+        min-height: 140px;
+        padding: 18px;
+    }
 }
 
 .floating-btn {
-    position: absolute;
-    cursor: pointer;
-    user-select: none;
-    color: #666;
-    background: transparent;
-    border: none;
-    border-radius: 50%;
-    box-shadow: none;
-    transition: all 0.3s ease;
-    opacity: 0;
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
+    position: absolute;
+    cursor: pointer;
+    user-select: none;
+    color: #666;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    box-shadow: none;
+    transition: all 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
 }
 .floating-btn:hover {
-    color: #444;
+    color: #444;
 }
 .floating-btn:focus { outline: none; }
 .floating-btn.visible {
-    opacity: 1;
-    pointer-events: all;
+    opacity: 1;
+    pointer-events: all;
 }
 
 #floatingPauseBtn {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    width: 80px;
-    height: 80px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    width: 80px;
+    height: 80px;
 }
 
 #fsBtn {
-    bottom: 15px;
-    right: 15px;
-    font-size: 1.5rem;
-    width: 45px;
-    height: 45px;
+    bottom: 15px;
+    right: 15px;
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
 }
 
 #restartBtn {
-    bottom: 15px;
-    left: 15px;
-    font-size: 1.5rem;
-    width: 45px;
-    height: 45px;
+    bottom: 15px;
+    left: 15px;
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
 }
 
 .fs-lock { overflow: hidden; }
 
 #installMessage {
-    background-color: #e3f2fd;
-    color: #0d47a1;
-    font-weight: bold;
-    border: 1px solid #90caf9;
-    font-size: 0.8em;
-    padding: 5px 10px;
-    margin-top: 5px;
-    line-height: 1.3;
+    background-color: #e3f2fd;
+    color: #0d47a1;
+    font-weight: bold;
+    border: 1px solid #90caf9;
+    font-size: 0.8em;
+    padding: 5px 10px;
+    margin-top: 5px;
+    line-height: 1.3;
 }
 #installMessage span {
-    font-size: 1.1em;
-    display: block;
-    margin-bottom: 2px;
+    font-size: 1.1em;
+    display: block;
+    margin-bottom: 2px;
 }
 
 /* Reducimos el ancho de los desplegables de texto */
 #studyLang, #studyVoice, #transLang, #transVoice, #repeatCount, #pause {
-    max-width: 120px;
+    max-width: 120px;
 }
 
 /* Ajuste específico para el desplegable de velocidad (aún más pequeño) */
 #speed {
-    max-width: 85px;
+    max-width: 85px;
 }
