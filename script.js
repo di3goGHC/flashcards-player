@@ -251,7 +251,7 @@ async function renderAndPlay() {
 document.getElementById('fileInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    fileNameEl.textContent = "📂 Archivo cargado: " + file.name;
+    fileNameEl.textContent = "📂 Archivo cargadoo: " + file.name;
     const reader = new FileReader();
     reader.onload = (ev) => {
         try {
