@@ -202,6 +202,38 @@ function getVoiceByURI(voiceURI) {
     return synth.getVoices().find(v => v.voiceURI === voiceURI) || null;
 }
 
+function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = true) {
+    return new Promise(async resolve => {
+        if (!text || isPaused) return resolve();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = langCode;
+        u.rate = parseFloat(speedSel.value) || 1;
+
+        let voice = null;
+        if (voiceURI) {
+            voice = getVoiceByURI(voiceURI);
+        } else {
+            voice = getVoiceByURI(isStudyLanguage ? studyVoiceSel.value : transVoiceSel.value);
+        }
+
+        if (!voice) {
+            const voices = synth.getVoices().filter(voice => voice.lang.startsWith(langCode.split('-')[0]));
+            voice = voices[0];
+        }
+
+        if (voice) u.voice = voice;
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+        if (playToken !== token) return resolve();
+        
+        // La siguiente línea se ha eliminado
+        // if (navigator.userAgent.match(/Android/i)) {
+        //     synth.cancel();
+        // }
+        synth.speak(u);
+    });
+}
+
 async function renderAndPlay() {
     if (!flashcards.length) return;
 
@@ -429,6 +461,7 @@ function populateStudyVoiceSelector() {
         studyVoiceLabel.style.display = 'none';
     }
 }
+
 
 transSel.addEventListener('change', populateVoiceSelector);
 studySel.addEventListener('change', populateStudyVoiceSelector);
