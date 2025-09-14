@@ -138,11 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Lógica de la aplicación
     function updateUI() {
-        const phrase = flashcardsData.phrases[currentPhraseIndex];
+        const phrase = flashcardsData[currentPhraseIndex];
         const studyLang = studyLangSelect.value;
         const transLang = transLangSelect.value;
         const showTranslation = showTransCheck.checked;
-        const total = flashcardsData.phrases.length;
+        const total = flashcardsData.length;
 
         introSection.style.display = 'none';
         phraseSection.style.opacity = '1';
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentPhraseIndex++;
         }
 
-        if (currentPhraseIndex < flashcardsData.phrases.length) {
+        if (currentPhraseIndex < flashcardsData.length) {
             setTimeout(updateUI, parseFloat(pauseSelect.value) * 1000);
         } else {
             console.log("Fin del estudio.");
@@ -216,11 +216,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                flashcardsData = JSON.parse(e.target.result);
-                if (flashcardsData && flashcardsData.phrases && flashcardsData.phrases.length > 0) {
+                const parsedData = JSON.parse(e.target.result);
+
+                // --- NUEVA LÓGICA DE DETECCIÓN DE FORMATO
+                if (Array.isArray(parsedData)) {
+                    flashcardsData = parsedData;
+                } else if (parsedData && Array.isArray(parsedData.phrases)) {
+                    flashcardsData = parsedData.phrases;
+                } else {
+                    errorSection.textContent = 'El archivo JSON no contiene el formato esperado o está vacío.';
+                    flashcardsData = null;
+                    return;
+                }
+                
+                if (flashcardsData.length > 0) {
                     fileNameElement.textContent = `Archivo cargado: ${file.name}`;
                     const languages = new Set();
-                    flashcardsData.phrases.forEach(phrase => {
+                    flashcardsData.forEach(phrase => {
                         Object.keys(phrase).forEach(lang => languages.add(lang));
                     });
 
