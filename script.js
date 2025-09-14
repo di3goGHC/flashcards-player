@@ -584,7 +584,7 @@ studySel.addEventListener('change', () => {
 
 transSel.addEventListener('change', () => {
     renderAndPlay();
-    saveState(); // Guardar el estado al cambiar de idioma de traducción
+    saveState(); // Guardar el estado al cambiar de idioma de traducción x
 });
 
 studyVoiceSel.addEventListener('change', () => {
