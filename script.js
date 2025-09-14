@@ -670,7 +670,7 @@ transVoiceSel.addEventListener('change', () => {
     saveState(); // Guardar el estado al cambiar la voz de traducción
 });
 
-// Guardar el estado cuando la página se oculta (por ejemplo, al apagar la pantalla)
+// Guardar el estado cuando la página se oculta (por ejemplo, al apagar la panntalla)
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
         saveState();
