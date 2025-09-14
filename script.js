@@ -36,7 +36,7 @@ let isPaused = false;
 let wakeLock = null;
 let floatingBtnTimer = null;
 let alternateStudyVoice = null;
-let deferredPrompt = null; // Variable para el evento de instalación
+let deferredPrompt = null;
 
 // Selectores de elementos
 const phraseEl = document.getElementById('phrase');
@@ -70,7 +70,18 @@ const PREFERRED = { 'en-gb': 'en-GB', 'es-es': 'es-ES', 'fr-fr': 'fr-FR' };
 // --- Funcionalidad PWA ---
 if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
     installMessage.style.display = 'block';
-    if (installBtn) {
+    
+    setTimeout(() => {
+        installMessage.style.display = 'none';
+    }, 4000);
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if(installBtn) installBtn.style.display = 'inline-block';
+    });
+
+    if(installBtn) {
         installBtn.addEventListener('click', () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
@@ -79,16 +90,11 @@ if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigato
             }
         });
     }
+} else {
+    installMessage.style.display = 'none';
 }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-});
-
 // --- Gestión de Wake Lock y Media Session (mejorado) ---
-
-// Nueva función para gestionar el estado de Media Session y Wake Lock
 function manageMediaSessionState(isPlaying) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
@@ -100,7 +106,6 @@ function manageMediaSessionState(isPlaying) {
     }
 }
 
-// Función para solicitar el Wake Lock
 async function requestWakeLock() {
     if ('wakeLock' in navigator && !wakeLock) {
         try {
@@ -115,7 +120,6 @@ async function requestWakeLock() {
     }
 }
 
-// Función para liberar el Wake Lock
 function releaseWakeLock() {
     if (wakeLock) {
         wakeLock.release()
@@ -155,7 +159,7 @@ function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = tr
         }
 
         if (!voice) {
-            const voices = synth.getVoices().filter(v => v.lang.startsWith(langCode.split('-')[0]));
+            const voices = synth.getVoices().filter(voice => voice.lang.startsWith(langCode.split('-')[0]));
             voice = voices[0];
         }
 
@@ -174,7 +178,6 @@ function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = tr
 async function renderAndPlay() {
     if (!flashcards.length) return;
 
-    // Solo si no está pausado, gestionamos el estado y solicitamos el Wake Lock
     if (!isPaused) {
         manageMediaSessionState(true);
     } else {
@@ -235,7 +238,6 @@ async function renderAndPlay() {
         
         index = (index + 1);
 
-        // Si se llega al final de la lista, se reinicia y se libera el Wake Lock
         if (index >= flashcards.length) {
             index = 0;
             manageMediaSessionState(false);
@@ -259,7 +261,6 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
             setupSelectors();
             introEl.style.display = "none";
             
-            // Activamos el Wake Lock de forma automática y se inicia la reproducción
             isPaused = false;
             manageMediaSessionState(true);
             renderAndPlay();
@@ -417,7 +418,7 @@ const togglePause = () => {
     if (isPaused) {
         floatingPauseBtn.textContent = '▶';
         try { synth.cancel(); } catch (_) { }
-        manageMediaSessionState(false); // Liberamos el lock al pausar
+        manageMediaSessionState(false);
         clearTimeout(floatingBtnTimer);
         floatingPauseBtn.classList.add('visible');
         fsBtn.classList.add('visible');
@@ -425,7 +426,7 @@ const togglePause = () => {
     } else {
         floatingPauseBtn.textContent = '❚❚';
         showFloatingButtons();
-        manageMediaSessionState(true); // Volvemos a solicitar el lock al reanudar
+        manageMediaSessionState(true);
         renderAndPlay();
     }
 };
@@ -466,7 +467,6 @@ restartBtn.addEventListener("click", () => {
     renderAndPlay();
 });
 
-// Eliminamos el evento para wakeLockBtn ya que ahora es automático.
 wakeLockBtn.addEventListener('click', () => {
     alert("La gestión de pantalla ahora es automática. ¡A estudiar sin interrupciones!");
 });
