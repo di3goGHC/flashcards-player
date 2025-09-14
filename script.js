@@ -33,7 +33,6 @@ let index = 0;
 let playToken = 0;
 let waitTimer = null;
 let isPaused = false;
-let isLooping = true; // Valor por defecto
 let wakeLock = null;
 let floatingBtnTimer = null;
 let alternateStudyVoice = null;
@@ -64,7 +63,6 @@ const floatingPauseBtn = document.getElementById('floatingPauseBtn');
 const installMessage = document.getElementById('installMessage');
 const fileInput = document.getElementById('fileInput');
 const installBtn = document.getElementById('installBtn');
-const loopBtn = document.getElementById('loopBtn'); // Nuevo botón de bucle
 
 const synth = window.speechSynthesis;
 const PREFERRED = { 'en-gb': 'en-GB', 'es-es': 'es-ES', 'fr-fr': 'fr-FR' };
@@ -78,7 +76,6 @@ function saveState() {
         flashcards: flashcards,
         currentIndex: index,
         isPaused: isPaused,
-        isLooping: isLooping, // Guardamos el estado del bucle
         studyLang: studySel.value,
         transLang: transSel.value,
         speed: speedSel.value,
@@ -104,7 +101,6 @@ function loadState() {
             flashcards = state.flashcards;
             index = state.currentIndex;
             isPaused = state.isPaused;
-            isLooping = state.isLooping !== undefined ? state.isLooping : true; // Carga el estado o usa el valor por defecto
             studySel.value = state.studyLang;
             transSel.value = state.transLang;
             speedSel.value = state.speed;
@@ -300,14 +296,11 @@ async function renderAndPlay() {
         index = (index + 1);
 
         if (index >= flashcards.length) {
-            if (isLooping) {
-                index = 0; // Reinicia la lista si el bucle está activado
-            } else {
-                index = 0; // Se detiene y reinicia el índice
-                manageMediaSessionState(false);
-                return;
-            }
+            index = 0;
+            manageMediaSessionState(false);
+            return;
         }
+
         renderAndPlay();
     }, delayMs);
 }
@@ -488,7 +481,6 @@ const togglePause = () => {
         floatingPauseBtn.classList.add('visible');
         fsBtn.classList.add('visible');
         restartBtn.classList.add('visible');
-        loopBtn.classList.add('visible'); // Muestra el botón de bucle al pausar
     } else {
         floatingPauseBtn.textContent = '❚❚';
         showFloatingButtons();
@@ -504,10 +496,8 @@ const showFloatingButtons = () => {
     floatingPauseBtn.classList.add('visible');
     fsBtn.classList.add('visible');
     restartBtn.classList.add('visible');
-    loopBtn.classList.add('visible'); // Muestra el botón de bucle
-
+    
     floatingPauseBtn.textContent = isPaused ? '▶' : '❚❚';
-    loopBtn.textContent = isLooping ? '🔁' : '➡️'; // Actualiza el icono del botón de bucle
 
     clearTimeout(floatingBtnTimer);
     floatingBtnTimer = setTimeout(() => {
@@ -515,16 +505,8 @@ const showFloatingButtons = () => {
             floatingPauseBtn.classList.remove('visible');
             fsBtn.classList.remove('visible');
             restartBtn.classList.remove('visible');
-            loopBtn.classList.remove('visible'); // Oculta el botón de bucle
         }
     }, 3000);
-};
-
-// Nueva función para gestionar el bucle
-const toggleLoop = () => {
-    isLooping = !isLooping;
-    loopBtn.textContent = isLooping ? '🔁' : '➡️';
-    saveState(); // Guardar el estado del bucle
 };
 
 flashcardEl.addEventListener('click', showFloatingButtons);
@@ -544,13 +526,6 @@ restartBtn.addEventListener("click", () => {
     saveState(); // Guardar el estado al reiniciar
     renderAndPlay();
 });
-
-// Event listener para el nuevo botón de bucle
-loopBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    toggleLoop();
-});
-
 
 wakeLockBtn.addEventListener('click', () => {
     alert("La gestión de pantalla ahora es automática. ¡A estudiar sin interrupciones!");
@@ -635,7 +610,6 @@ document.addEventListener('visibilitychange', () => {
 // Cargar el estado al iniciar la aplicación
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
-    loopBtn.textContent = isLooping ? '🔁' : '➡️'; // Establece el icono inicial del botón
     
     // Si no se carga un estado previo, se inician los selectores.
     if (!localStorage.getItem(STATE_KEY)) {
