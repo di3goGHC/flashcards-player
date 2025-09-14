@@ -141,28 +141,23 @@ select, input[type="checkbox"], button, a.button {
     color: #666;
 }
 .floating-btn:hover {
-    color: #444;
+    background-color: rgba(0, 0, 0, 0.1);
 }
 .floating-btn:focus { outline: none; }
 .floating-btn.visible {
     opacity: 1;
     pointer-events: all;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-.floating-btn.active {
-    color: #e53935;
 }
 
 /* Estilo para los iconos dentro de los botones */
 .floating-btn i {
     font-size: 1.5rem;
-    color: #ccc;
+    color: #888;
     transition: color 0.3s ease;
 }
 
 .floating-btn:hover i {
-    color: #fff;
+    color: #444;
 }
 
 .floating-btn.active i {
@@ -198,31 +193,32 @@ select, input[type="checkbox"], button, a.button {
 }
 
 /* Contenedores para los botones flotantes dentro de la flashcard */
-.card-floating-buttons-left, .card-floating-buttons-right {
+.card-floating-buttons-left, .card-floating-buttons-right, .card-floating-buttons-center {
     position: absolute;
-    bottom: 15px;
     display: flex;
     gap: 10px;
     z-index: 10;
 }
 
 .card-floating-buttons-left {
+    bottom: 15px;
     left: 15px;
 }
 
 .card-floating-buttons-right {
+    bottom: 15px;
     right: 15px;
 }
-
-/* Posición del botón de pausa en el centro */
-#floatingPauseBtn {
-    position: absolute;
+.card-floating-buttons-center {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     font-size: 2.5rem;
     width: 80px;
     height: 80px;
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
+    border-radius: 50%;
+}
+
+.card-floating-buttons-center .floating-btn i {
+    font-size: 2.5rem;
 }

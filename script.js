@@ -63,6 +63,7 @@ const floatingPauseBtn = document.getElementById('floatingPauseBtn');
 const installMessage = document.getElementById('installMessage');
 const fileInput = document.getElementById('fileInput');
 const installBtn = document.getElementById('installBtn');
+const loopBtn = document.getElementById('loopBtn');
 
 const synth = window.speechSynthesis;
 const PREFERRED = { 'en-gb': 'en-GB', 'es-es': 'es-ES', 'fr-fr': 'fr-FR' };
@@ -199,37 +200,6 @@ function resolveLangCode(key) {
 
 function getVoiceByURI(voiceURI) {
     return synth.getVoices().find(v => v.voiceURI === voiceURI) || null;
-}
-
-function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = true) {
-    return new Promise(async resolve => {
-        if (!text || isPaused) return resolve();
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = langCode;
-        u.rate = parseFloat(speedSel.value) || 1;
-
-        let voice = null;
-        if (voiceURI) {
-            voice = getVoiceByURI(voiceURI);
-        } else {
-            voice = getVoiceByURI(isStudyLanguage ? studyVoiceSel.value : transVoiceSel.value);
-        }
-
-        if (!voice) {
-            const voices = synth.getVoices().filter(voice => voice.lang.startsWith(langCode.split('-')[0]));
-            voice = voices[0];
-        }
-
-        if (voice) u.voice = voice;
-        u.onend = () => resolve();
-        u.onerror = () => resolve();
-        if (playToken !== token) return resolve();
-
-        if (navigator.userAgent.match(/Android/i)) {
-            synth.cancel();
-        }
-        synth.speak(u);
-    });
 }
 
 async function renderAndPlay() {
@@ -460,7 +430,6 @@ function populateStudyVoiceSelector() {
     }
 }
 
-
 transSel.addEventListener('change', populateVoiceSelector);
 studySel.addEventListener('change', populateStudyVoiceSelector);
 
@@ -474,15 +443,14 @@ const togglePause = () => {
     if (flashcards.length === 0) return;
     isPaused = !isPaused;
     if (isPaused) {
-        floatingPauseBtn.textContent = '▶';
+        floatingPauseBtn.querySelector('i').className = 'fa-solid fa-play';
         try { synth.cancel(); } catch (_) { }
         manageMediaSessionState(false);
         clearTimeout(floatingBtnTimer);
-        floatingPauseBtn.classList.add('visible');
-        fsBtn.classList.add('visible');
-        restartBtn.classList.add('visible');
+        const floatingButtons = document.querySelectorAll('.floating-btn');
+        floatingButtons.forEach(btn => btn.classList.add('visible'));
     } else {
-        floatingPauseBtn.textContent = '❚❚';
+        floatingPauseBtn.querySelector('i').className = 'fa-solid fa-pause';
         showFloatingButtons();
         manageMediaSessionState(true);
         renderAndPlay();
@@ -493,18 +461,15 @@ const togglePause = () => {
 const showFloatingButtons = () => {
     if (flashcards.length === 0) return;
     
-    floatingPauseBtn.classList.add('visible');
-    fsBtn.classList.add('visible');
-    restartBtn.classList.add('visible');
+    const floatingButtons = document.querySelectorAll('.floating-btn');
+    floatingButtons.forEach(btn => btn.classList.add('visible'));
     
-    floatingPauseBtn.textContent = isPaused ? '▶' : '❚❚';
+    floatingPauseBtn.querySelector('i').className = isPaused ? 'fa-solid fa-play' : 'fa-solid fa-pause';
 
     clearTimeout(floatingBtnTimer);
     floatingBtnTimer = setTimeout(() => {
         if (!isPaused) {
-            floatingPauseBtn.classList.remove('visible');
-            fsBtn.classList.remove('visible');
-            restartBtn.classList.remove('visible');
+            floatingButtons.forEach(btn => btn.classList.remove('visible'));
         }
     }, 3000);
 };
@@ -517,7 +482,8 @@ floatingPauseBtn.addEventListener('click', (e) => {
     togglePause();
 });
 
-restartBtn.addEventListener("click", () => {
+restartBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
     if(!flashcards.length) return;
     index=0;
     isPaused = false;
@@ -527,6 +493,12 @@ restartBtn.addEventListener("click", () => {
     renderAndPlay();
 });
 
+loopBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    isLoopActive = !isLoopActive;
+    loopBtn.classList.toggle('active', isLoopActive);
+});
+
 wakeLockBtn.addEventListener('click', () => {
     alert("La gestión de pantalla ahora es automática. ¡A estudiar sin interrupciones!");
 });
@@ -534,8 +506,9 @@ wakeLockBtn.addEventListener('click', () => {
 function isFullscreenActive(){
     return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
 }
+
 function updateFsIcon(){
-    fsBtn.textContent = isFullscreenActive() ? '🗙' : '⛶';
+    fsBtn.querySelector('i').className = isFullscreenActive() ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
     fsBtn.title = isFullscreenActive() ? 'Restaurar' : 'Pantalla completa';
 }
 
@@ -545,6 +518,7 @@ async function enterFullscreen(el){
     else if (el.msRequestFullscreen) await el.msRequestFullscreen();
     updateFsIcon();
 }
+
 async function exitFullscreen(){
     if (document.exitFullscreen) await document.exitFullscreen();
     else if (document.webkitExitFullscreen) await document.webkitExitFullscreen();
