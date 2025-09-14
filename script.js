@@ -19,12 +19,16 @@ if ('mediaSession' in navigator) {
         togglePause();
     });
 
+    // Nuevo manejador para el botón "siguiente" en Media Session
     navigator.mediaSession.setActionHandler('nexttrack', () => {
         console.log('Se ha pulsado el botón de Siguiente (desde Media Session)');
-        if (!isPaused) {
-            index = (index + 1) % flashcards.length;
-            renderAndPlay();
-        }
+        nextCard();
+    });
+
+    // Nuevo manejador para el botón "anterior" en Media Session
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+        console.log('Se ha pulsado el botón de Anterior (desde Media Session)');
+        prevCard();
     });
 }
 
@@ -65,6 +69,10 @@ const installMessage = document.getElementById('installMessage');
 const fileInput = document.getElementById('fileInput');
 const installBtn = document.getElementById('installBtn');
 const loopBtn = document.getElementById('loopBtn');
+
+// Nuevos selectores para los botones de navegación
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
 
 const synth = window.speechSynthesis;
 const PREFERRED = { 'en-gb': 'en-GB', 'es-es': 'es-ES', 'fr-fr': 'fr-FR' };
@@ -295,16 +303,7 @@ async function renderAndPlay() {
     waitTimer = setTimeout(() => {
         if (playToken !== myToken || isPaused) return;
         
-        index = (index + 1);
-        if (index >= flashcards.length) {
-            if (isLoopActive) {
-                index = 0;
-            } else {
-                manageMediaSessionState(false);
-                return;
-            }
-        }
-        renderAndPlay();
+        nextCard();
     }, delayMs);
 }
 
@@ -476,6 +475,47 @@ function updateLoopButton() {
     }
 }
 
+// Función para avanzar a la siguiente flashcard
+function nextCard() {
+    if(!flashcards.length) return;
+    
+    clearTimeout(waitTimer);
+    try { synth.cancel(); } catch (_) {}
+    
+    index++;
+    if (index >= flashcards.length) {
+        if (isLoopActive) {
+            index = 0;
+        } else {
+            index = flashcards.length - 1; // Se queda en la última tarjeta si el bucle está desactivado
+            manageMediaSessionState(false);
+            return;
+        }
+    }
+    renderAndPlay();
+    saveState();
+}
+
+// Función para retroceder a la flashcard anterior
+function prevCard() {
+    if(!flashcards.length) return;
+
+    clearTimeout(waitTimer);
+    try { synth.cancel(); } catch (_) {}
+
+    index--;
+    if (index < 0) {
+        if (isLoopActive) {
+            index = flashcards.length - 1;
+        } else {
+            index = 0; // Se queda en la primera tarjeta si el bucle está desactivado
+            return; // No hace nada si ya estamos en la primera y no hay bucle
+        }
+    }
+    renderAndPlay();
+    saveState();
+}
+
 
 transSel.addEventListener('change', populateVoiceSelector);
 studySel.addEventListener('change', populateStudyVoiceSelector);
@@ -527,6 +567,17 @@ flashcardEl.addEventListener('touchstart', showFloatingButtons);
 floatingPauseBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     togglePause();
+});
+
+// Event listeners para los nuevos botones de navegación
+prevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    prevCard();
+});
+
+nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    nextCard();
 });
 
 restartBtn.addEventListener("click", (e) => {
