@@ -164,6 +164,15 @@ select, input[type="checkbox"], button, a.button {
     color: #e53935;
 }
 
+/* Nuevas clases para los colores del bucle */
+.loop-active {
+    color: green !important;
+}
+
+.loop-inactive {
+    color: red !important;
+}
+
 .fs-lock { overflow: hidden; }
 
 #installMessage {

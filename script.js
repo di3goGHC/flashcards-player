@@ -37,6 +37,7 @@ let wakeLock = null;
 let floatingBtnTimer = null;
 let alternateStudyVoice = null;
 let deferredPrompt = null;
+let isLoopActive = true;
 
 // Selectores de elementos
 const phraseEl = document.getElementById('phrase');
@@ -84,7 +85,8 @@ function saveState() {
         showTrans: showTransChk.checked,
         repeatCount: repeatCountSel.value,
         studyVoice: studyVoiceSel.value,
-        transVoice: transVoiceSel.value
+        transVoice: transVoiceSel.value,
+        isLoopActive: isLoopActive
     };
     try {
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -110,10 +112,12 @@ function loadState() {
             repeatCountSel.value = state.repeatCount;
             studyVoiceSel.value = state.studyVoice;
             transVoiceSel.value = state.transVoice;
+            isLoopActive = state.isLoopActive !== undefined ? state.isLoopActive : true;
 
             // Mostrar la interfaz y reanudar la reproducción
             introEl.style.display = "none";
             setupSelectors(); // Para asegurar que los selectores se carguen correctamente
+            updateLoopButton();
             if (!isPaused) {
                 renderAndPlay();
             } else {
@@ -226,10 +230,6 @@ function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = tr
         u.onerror = () => resolve();
         if (playToken !== token) return resolve();
         
-        // La siguiente línea se ha eliminado
-        // if (navigator.userAgent.match(/Android/i)) {
-        //     synth.cancel();
-        // }
         synth.speak(u);
     });
 }
@@ -296,13 +296,14 @@ async function renderAndPlay() {
         if (playToken !== myToken || isPaused) return;
         
         index = (index + 1);
-
         if (index >= flashcards.length) {
-            index = 0;
-            manageMediaSessionState(false);
-            return;
+            if (isLoopActive) {
+                index = 0;
+            } else {
+                manageMediaSessionState(false);
+                return;
+            }
         }
-
         renderAndPlay();
     }, delayMs);
 }
@@ -321,8 +322,10 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
             introEl.style.display = "none";
             
             isPaused = false;
+            isLoopActive = true; // Por defecto activamos el bucle al cargar un archivo
+            updateLoopButton();
             manageMediaSessionState(true);
-            saveState(); // Guardar el estado inicial después de cargar un archivo
+            saveState();
             renderAndPlay();
         } catch (err) { errorEl.textContent = 'Error al leer JSON: ' + err; }
     };
@@ -462,6 +465,17 @@ function populateStudyVoiceSelector() {
     }
 }
 
+function updateLoopButton() {
+    const loopIcon = loopBtn.querySelector('i');
+    if (isLoopActive) {
+        loopIcon.classList.remove('loop-inactive');
+        loopIcon.classList.add('loop-active');
+    } else {
+        loopIcon.classList.remove('loop-active');
+        loopIcon.classList.add('loop-inactive');
+    }
+}
+
 
 transSel.addEventListener('change', populateVoiceSelector);
 studySel.addEventListener('change', populateStudyVoiceSelector);
@@ -529,7 +543,8 @@ restartBtn.addEventListener("click", (e) => {
 loopBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     isLoopActive = !isLoopActive;
-    loopBtn.classList.toggle('active', isLoopActive);
+    updateLoopButton();
+    saveState();
 });
 
 wakeLockBtn.addEventListener('click', () => {
@@ -618,8 +633,9 @@ document.addEventListener('visibilitychange', () => {
 document.addEventListener('DOMContentLoaded', () => {
     loadState();
     
-    // Si no se carga un estado previo, se inician los selectores.
+    // Si no se carga un estado previo, se inician los selectores y el botón de bucle.
     if (!localStorage.getItem(STATE_KEY)) {
         setupSelectors();
+        updateLoopButton();
     }
 });
