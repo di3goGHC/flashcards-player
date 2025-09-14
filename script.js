@@ -35,7 +35,7 @@ let waitTimer = null;
 let isPaused = false;
 let wakeLock = null;
 let floatingBtnTimer = null;
-let alternateStudyVoice = null; // Variable para almacenar la voz de alternancia
+let alternateStudyVoice = null;
 
 const phraseEl = document.getElementById('phrase');
 const transEl = document.getElementById('translation');
@@ -44,7 +44,7 @@ const studySel = document.getElementById('studyLang');
 const studyVoiceLabel = document.getElementById('studyVoiceLabel');
 const studyVoiceSel = document.getElementById('studyVoice');
 const transSel = document.getElementById('transLang');
-const transVoiceLabel = document = document.getElementById('transVoiceLabel');
+const transVoiceLabel = document.getElementById('transVoiceLabel');
 const transVoiceSel = document.getElementById('transVoice');
 const showTransChk = document.getElementById('showTransCheck');
 const repeatCountSel = document.getElementById('repeatCount');
@@ -56,14 +56,14 @@ const restartBtn = document.getElementById('restartBtn');
 const fileNameEl = document.getElementById('fileName');
 const flashcardEl = document.getElementById('flashcard');
 const fsBtn = document.getElementById('fsBtn');
-const wakeLockBtn = document.getElementById('wakeLockBtn');
+// Eliminamos la referencia a wakeLockBtn
 const floatingPauseBtn = document.getElementById('floatingPauseBtn');
 const installMessage = document.getElementById('installMessage');
+const fileInput = document.getElementById('fileInput');
 
 const synth = window.speechSynthesis;
 const PREFERRED = { 'en-gb':'en-GB', 'es-es':'es-ES', 'fr-fr':'fr-FR' };
 
-// Muestra el mensaje de instalación si la app no está en modo standalone
 if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
     installMessage.style.display = 'block';
     setTimeout(() => {
@@ -96,14 +96,12 @@ function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = tr
         if (voiceURI) {
             voice = getVoiceByURI(voiceURI);
         } else {
-             // Si no se especifica una voz, usa la voz por defecto seleccionada.
-             voice = getVoiceByURI(isStudyLanguage ? studyVoiceSel.value : transVoiceSel.value);
+            voice = getVoiceByURI(isStudyLanguage ? studyVoiceSel.value : transVoiceSel.value);
         }
 
         if(!voice) {
-             // Si la voz no se encontró, se usa una de respaldo
-             const voices = synth.getVoices().filter(v => v.lang.startsWith(langCode.split('-')[0]));
-             voice = voices[0];
+            const voices = synth.getVoices().filter(v => v.lang.startsWith(langCode.split('-')[0]));
+            voice = voices[0];
         }
 
         if(voice) u.voice = voice;
@@ -118,14 +116,20 @@ function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = tr
     });
 }
 
+// Gestión de Wake Lock - Activación/Desactivación automática
 async function requestWakeLock() {
     if ('wakeLock' in navigator) {
         try {
-            wakeLock = await navigator.wakeLock.request('screen');
-            wakeLock.addEventListener('release', () => {
-                console.log('Wake Lock was released');
-            });
-            console.log('Wake Lock is active');
+            if (!wakeLock) {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Wake Lock está activo.');
+                
+                // Vuelve a solicitar el bloqueo si la pantalla se desbloquea
+                wakeLock.addEventListener('release', () => {
+                    console.log('Wake Lock ha sido liberado externamente. Intentando reactivar...');
+                    requestWakeLock();
+                });
+            }
         } catch (err) {
             console.error(`${err.name}, ${err.message}`);
         }
@@ -137,22 +141,17 @@ function releaseWakeLock() {
         wakeLock.release()
             .then(() => {
                 wakeLock = null;
-                console.log('Wake Lock was released');
+                console.log('Wake Lock ha sido liberado.');
             })
             .catch(err => {
-                console.error(`Failed to release wake lock: ${err.message}`);
+                console.error(`Error al liberar el Wake Lock: ${err.message}`);
             });
     }
 }
-        
+    
 async function renderAndPlay(){
     if(!flashcards.length || isPaused) return;
 
-    if (wakeLockBtn.dataset.active === 'true') {
-        requestWakeLock();
-    } else {
-    }
-    
     playToken++;
     const myToken = playToken;
     try{ synth.cancel(); }catch(_){ }
@@ -188,11 +187,8 @@ async function renderAndPlay(){
     for (let i = 0; i < repeatCount; i++) {
         let voiceToUse = null;
         if (repeatCount > 1 && alternateStudyVoice) {
-            // Primera repetición: usa la voz por defecto (masculina).
-            // Siguientes repeticiones: se alternan con la voz secundaria.
             voiceToUse = (i % 2 === 0) ? studyVoiceSel.value : alternateStudyVoice.voiceURI;
         } else {
-            // Si las repeticiones son 1 o no hay una voz de alternancia, usa la del desplegable.
             voiceToUse = studyVoiceSel.value;
         }
 
@@ -207,7 +203,14 @@ async function renderAndPlay(){
     const delayMs = (parseFloat(pauseSel.value,10)||2)*1000;
     waitTimer = setTimeout(()=>{
         if(playToken !== myToken || isPaused) return;
-        index = (index+1) % flashcards.length;
+        
+        index = (index + 1) % flashcards.length;
+
+        // Si la reproducción llega al final de la lista, liberamos el Wake Lock
+        if (index === 0) {
+            releaseWakeLock();
+        }
+
         renderAndPlay();
     }, delayMs);
 }
@@ -224,11 +227,10 @@ document.getElementById('fileInput').addEventListener('change', (e)=>{
             flashcards = json; index=0; errorEl.textContent='';
             setupSelectors();
             introEl.style.display="none";
-            // Se activa el Wake Lock por defecto
+            
+            // Activamos el Wake Lock automáticamente al iniciar la reproducción.
             requestWakeLock();
-            wakeLockBtn.dataset.active = 'true';
-            wakeLockBtn.textContent = '🔓';
-            wakeLockBtn.title = 'Desbloquear pantalla';
+            
             renderAndPlay();
         }catch(err){ errorEl.textContent='Error al leer JSON: '+err; }
     };
@@ -311,7 +313,6 @@ function populateVoiceSelector() {
             transVoiceSel.appendChild(option);
         });
         
-        // Selecciona una voz por defecto (ej. Google)
         const preferredVoice = voices.find(v => v.name.startsWith('Google') && v.lang === transLangCode);
         if (preferredVoice) {
             transVoiceSel.value = preferredVoice.voiceURI;
@@ -341,7 +342,6 @@ function populateStudyVoiceSelector() {
             studyVoiceSel.appendChild(option);
         });
 
-        // Selecciona una voz por defecto en el desplegable
         const preferredMaleVoice = voices.find(v => v.name.includes('Google UK English Male'));
         const firstGoogleMale = voices.find(v => v.name.startsWith('Google') && v.name.toLowerCase().includes('male'));
         const firstGoogleVoice = voices.find(v => v.name.startsWith('Google'));
@@ -360,7 +360,6 @@ function populateStudyVoiceSelector() {
 
         if (defaultVoiceURI) {
             studyVoiceSel.value = defaultVoiceURI;
-            // Busca una voz alternativa que no sea la por defecto.
             alternateStudyVoice = voices.find(v => v.voiceURI !== defaultVoiceURI);
         } else {
             alternateStudyVoice = null;
@@ -372,11 +371,9 @@ function populateStudyVoiceSelector() {
 }
 
 
-// Eventos que actualizan las voces cada vez que el idioma cambia
 transSel.addEventListener('change', populateVoiceSelector);
 studySel.addEventListener('change', populateStudyVoiceSelector);
 
-// Evento que se dispara cuando el navegador carga las voces disponibles
 synth.onvoiceschanged = () => {
     populateStudyVoiceSelector();
     populateVoiceSelector();
@@ -389,7 +386,7 @@ const togglePause = () => {
     if (isPaused) {
         floatingPauseBtn.textContent = '▶';
         try { synth.cancel(); } catch(_) { }
-        releaseWakeLock();
+        releaseWakeLock(); // Liberamos el lock al pausar
         clearTimeout(floatingBtnTimer);
         floatingPauseBtn.classList.add('visible');
         fsBtn.classList.add('visible');
@@ -397,6 +394,7 @@ const togglePause = () => {
     } else {
         floatingPauseBtn.textContent = '❚❚';
         showFloatingButtons(); 
+        requestWakeLock(); // Volvemos a solicitar el lock al reanudar
         renderAndPlay();
     }
 };
@@ -437,24 +435,9 @@ restartBtn.addEventListener("click", () => {
     renderAndPlay();
 });
 
-wakeLockBtn.addEventListener('click', () => {
-    if ('wakeLock' in navigator) {
-        if (wakeLockBtn.dataset.active === 'true') {
-            wakeLockBtn.dataset.active = 'false';
-            wakeLockBtn.textContent = '🔒';
-            wakeLockBtn.title = 'Bloquear pantalla';
-            releaseWakeLock();
-        } else {
-            wakeLockBtn.dataset.active = 'true';
-            wakeLockBtn.textContent = '🔓';
-            wakeLockBtn.title = 'Desbloquear pantalla';
-            requestWakeLock();
-        }
-    } else {
-        alert("Tu navegador no soporta la Wake Lock API.");
-    }
-});
-        
+// Eliminamos el evento para wakeLockBtn ya que ahora es automático.
+// wakeLockBtn.addEventListener('click', ...);
+
 function isFullscreenActive(){
     return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
 }
