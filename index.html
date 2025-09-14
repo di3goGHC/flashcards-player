@@ -9,6 +9,7 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     <link rel="shortcut icon" href="/favicon.ico">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -58,9 +59,27 @@
         <div id="phrase"></div>
         <div id="translation"></div>
 
-        <button id="fsBtn" class="floating-btn" title="Pantalla completa">⛶</button>
-        <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">▶</button>
-        <button id="restartBtn" class="floating-btn" title="Reiniciar">↻</button>
+        <div class="card-floating-buttons-left">
+            <button id="restartBtn" class="floating-btn visible" title="Reiniciar">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
+            <button id="loopBtn" class="floating-btn visible active" title="Bucle">
+                <i class="fa-solid fa-repeat"></i>
+            </button>
+        </div>
+
+        <button id="floatingPauseBtn" class="floating-btn visible" title="Pausar/Reproducir">
+            <i class="fa-solid fa-play"></i>
+        </button>
+
+        <div class="card-floating-buttons-right">
+            <button id="nextBtn" class="floating-btn visible" title="Siguiente">
+                <i class="fa-solid fa-forward-step"></i>
+            </button>
+            <button id="fsBtn" class="floating-btn visible" title="Pantalla completa">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
     </div>
 
     <div id="error"></div>
