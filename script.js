@@ -67,6 +67,63 @@ const installBtn = document.getElementById('installBtn');
 const synth = window.speechSynthesis;
 const PREFERRED = { 'en-gb': 'en-GB', 'es-es': 'es-ES', 'fr-fr': 'fr-FR' };
 
+// --- Funcionalidad de Persistencia de Estado ---
+const STATE_KEY = 'flashcard_state';
+
+function saveState() {
+    const state = {
+        fileName: fileNameEl.textContent,
+        flashcards: flashcards,
+        currentIndex: index,
+        isPaused: isPaused,
+        studyLang: studySel.value,
+        transLang: transSel.value,
+        speed: speedSel.value,
+        pause: pauseSel.value,
+        showTrans: showTransChk.checked,
+        repeatCount: repeatCountSel.value,
+        studyVoice: studyVoiceSel.value,
+        transVoice: transVoiceSel.value
+    };
+    try {
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    } catch (e) {
+        console.error("Error al guardar el estado en localStorage:", e);
+    }
+}
+
+function loadState() {
+    try {
+        const savedState = localStorage.getItem(STATE_KEY);
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            fileNameEl.textContent = state.fileName;
+            flashcards = state.flashcards;
+            index = state.currentIndex;
+            isPaused = state.isPaused;
+            studySel.value = state.studyLang;
+            transSel.value = state.transLang;
+            speedSel.value = state.speed;
+            pauseSel.value = state.pause;
+            showTransChk.checked = state.showTrans;
+            repeatCountSel.value = state.repeatCount;
+            studyVoiceSel.value = state.studyVoice;
+            transVoiceSel.value = state.transVoice;
+
+            // Mostrar la interfaz y reanudar la reproducción
+            introEl.style.display = "none";
+            setupSelectors(); // Para asegurar que los selectores se carguen correctamente
+            if (!isPaused) {
+                renderAndPlay();
+            } else {
+                togglePause(); // Para actualizar el botón de pausa y el estado
+            }
+        }
+    } catch (e) {
+        console.error("Error al cargar el estado desde localStorage:", e);
+    }
+}
+
 // --- Funcionalidad PWA ---
 if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
     installMessage.style.display = 'block';
@@ -251,7 +308,7 @@ async function renderAndPlay() {
 document.getElementById('fileInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    fileNameEl.textContent = "📂 Archivo cargadoo: " + file.name;
+    fileNameEl.textContent = "📂 Archivo cargado: " + file.name;
     const reader = new FileReader();
     reader.onload = (ev) => {
         try {
@@ -263,6 +320,7 @@ document.getElementById('fileInput').addEventListener('change', (e) => {
             
             isPaused = false;
             manageMediaSessionState(true);
+            saveState(); // Guardar el estado inicial después de cargar un archivo
             renderAndPlay();
         } catch (err) { errorEl.textContent = 'Error al leer JSON: ' + err; }
     };
@@ -429,6 +487,7 @@ const togglePause = () => {
         manageMediaSessionState(true);
         renderAndPlay();
     }
+    saveState(); // Guardamos el estado al pausar/reanudar
 };
 
 const showFloatingButtons = () => {
@@ -464,6 +523,7 @@ restartBtn.addEventListener("click", () => {
     isPaused = false;
     clearTimeout(waitTimer);
     try{ synth.cancel(); }catch(_){ }
+    saveState(); // Guardar el estado al reiniciar
     renderAndPlay();
 });
 
@@ -507,14 +567,52 @@ repeatCountSel.addEventListener('change', () => {
         studyVoiceSel.disabled = false;
     }
     renderAndPlay();
+    saveState(); // Guardar el estado al cambiar la configuración de repetición
 });
 
 showTransCheck.addEventListener('change', () => {
     const isChecked = showTransCheck.checked;
     transLang.disabled = !isChecked;
     transVoice.disabled = !isChecked;
+    saveState(); // Guardar el estado al activar/desactivar la traducción
+});
+
+studySel.addEventListener('change', () => {
+    renderAndPlay();
+    saveState(); // Guardar el estado al cambiar de idioma de estudio
+});
+
+transSel.addEventListener('change', () => {
+    renderAndPlay();
+    saveState(); // Guardar el estado al cambiar de idioma de traducción
 });
 
 studyVoiceSel.addEventListener('change', () => {
     renderAndPlay();
+    saveState(); // Guardar el estado al cambiar la voz de estudio
+});
+
+transVoiceSel.addEventListener('change', () => {
+    renderAndPlay();
+    saveState(); // Guardar el estado al cambiar la voz de traducción
+});
+
+// Guardar el estado cuando la página se oculta (por ejemplo, al apagar la pantalla)
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        saveState();
+        try {
+            speechSynthesis.cancel();
+        } catch (_) {}
+    }
+});
+
+// Cargar el estado al iniciar la aplicación
+document.addEventListener('DOMContentLoaded', () => {
+    loadState();
+    
+    // Si no se carga un estado previo, se inician los selectores.
+    if (!localStorage.getItem(STATE_KEY)) {
+        setupSelectors();
+    }
 });
