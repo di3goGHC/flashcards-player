@@ -36,7 +36,9 @@ let isPaused = false;
 let wakeLock = null;
 let floatingBtnTimer = null;
 let alternateStudyVoice = null;
+let deferredPrompt = null; // Variable para el evento de instalación
 
+// Selectores de elementos
 const phraseEl = document.getElementById('phrase');
 const transEl = document.getElementById('translation');
 const introEl = document.getElementById('intro');
@@ -56,25 +58,78 @@ const restartBtn = document.getElementById('restartBtn');
 const fileNameEl = document.getElementById('fileName');
 const flashcardEl = document.getElementById('flashcard');
 const fsBtn = document.getElementById('fsBtn');
-// Eliminamos la referencia a wakeLockBtn
+const wakeLockBtn = document.getElementById('wakeLockBtn');
 const floatingPauseBtn = document.getElementById('floatingPauseBtn');
 const installMessage = document.getElementById('installMessage');
 const fileInput = document.getElementById('fileInput');
+const installBtn = document.getElementById('installBtn');
 
 const synth = window.speechSynthesis;
-const PREFERRED = { 'en-gb':'en-GB', 'es-es':'es-ES', 'fr-fr':'fr-FR' };
+const PREFERRED = { 'en-gb': 'en-GB', 'es-es': 'es-ES', 'fr-fr': 'fr-FR' };
 
+// --- Funcionalidad PWA ---
 if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
     installMessage.style.display = 'block';
-    setTimeout(() => {
-        installMessage.style.display = 'none';
-    }, 5000);
+    if (installBtn) {
+        installBtn.addEventListener('click', () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt = null;
+                installMessage.style.display = 'none';
+            }
+        });
+    }
 }
 
-function resolveLangCode(key){
-    if(!key) return 'en-US';
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+});
+
+// --- Gestión de Wake Lock y Media Session (mejorado) ---
+
+// Nueva función para gestionar el estado de Media Session y Wake Lock
+function manageMediaSessionState(isPlaying) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+    if (isPlaying) {
+        requestWakeLock();
+    } else {
+        releaseWakeLock();
+    }
+}
+
+// Función para solicitar el Wake Lock
+async function requestWakeLock() {
+    if ('wakeLock' in navigator && !wakeLock) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+                console.log('Wake Lock fue liberado');
+            });
+            console.log('Wake Lock solicitado correctamente');
+        } catch (err) {
+            console.error('Error al solicitar Wake Lock:', err.name, err.message);
+        }
+    }
+}
+
+// Función para liberar el Wake Lock
+function releaseWakeLock() {
+    if (wakeLock) {
+        wakeLock.release()
+            .then(() => {
+                wakeLock = null;
+                console.log('Wake Lock liberado');
+            });
+    }
+}
+
+function resolveLangCode(key) {
+    if (!key) return 'en-US';
     const k = key.toLowerCase();
-    if(PREFERRED[k]) return PREFERRED[k];
+    if (PREFERRED[k]) return PREFERRED[k];
     if (k.includes('en')) return 'en-US';
     if (k.includes('fr')) return 'fr-FR';
     if (k.includes('es')) return 'es-ES';
@@ -85,13 +140,13 @@ function getVoiceByURI(voiceURI) {
     return synth.getVoices().find(v => v.voiceURI === voiceURI) || null;
 }
 
-function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = true){
-    return new Promise(async resolve=>{
-        if(!text || isPaused) return resolve();
+function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = true) {
+    return new Promise(async resolve => {
+        if (!text || isPaused) return resolve();
         const u = new SpeechSynthesisUtterance(text);
         u.lang = langCode;
         u.rate = parseFloat(speedSel.value) || 1;
-        
+
         let voice = null;
         if (voiceURI) {
             voice = getVoiceByURI(voiceURI);
@@ -99,16 +154,16 @@ function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = tr
             voice = getVoiceByURI(isStudyLanguage ? studyVoiceSel.value : transVoiceSel.value);
         }
 
-        if(!voice) {
+        if (!voice) {
             const voices = synth.getVoices().filter(v => v.lang.startsWith(langCode.split('-')[0]));
             voice = voices[0];
         }
 
-        if(voice) u.voice = voice;
-        u.onend = ()=> resolve();
-        u.onerror= ()=> resolve();
-        if(playToken !== token) return resolve();
-        
+        if (voice) u.voice = voice;
+        u.onend = () => resolve();
+        u.onerror = () => resolve();
+        if (playToken !== token) return resolve();
+
         if (navigator.userAgent.match(/Android/i)) {
             synth.cancel();
         }
@@ -116,45 +171,19 @@ function speakAsync(text, langCode, token, voiceURI = null, isStudyLanguage = tr
     });
 }
 
-// Gestión de Wake Lock - Activación/Desactivación automática
-async function requestWakeLock() {
-    if ('wakeLock' in navigator) {
-        try {
-            if (!wakeLock) {
-                wakeLock = await navigator.wakeLock.request('screen');
-                console.log('Wake Lock está activo.');
-                
-                // Vuelve a solicitar el bloqueo si la pantalla se desbloquea
-                wakeLock.addEventListener('release', () => {
-                    console.log('Wake Lock ha sido liberado externamente. Intentando reactivar...');
-                    requestWakeLock();
-                });
-            }
-        } catch (err) {
-            console.error(`${err.name}, ${err.message}`);
-        }
-    }
-}
+async function renderAndPlay() {
+    if (!flashcards.length) return;
 
-function releaseWakeLock() {
-    if (wakeLock) {
-        wakeLock.release()
-            .then(() => {
-                wakeLock = null;
-                console.log('Wake Lock ha sido liberado.');
-            })
-            .catch(err => {
-                console.error(`Error al liberar el Wake Lock: ${err.message}`);
-            });
+    // Solo si no está pausado, gestionamos el estado y solicitamos el Wake Lock
+    if (!isPaused) {
+        manageMediaSessionState(true);
+    } else {
+        return;
     }
-}
     
-async function renderAndPlay(){
-    if(!flashcards.length || isPaused) return;
-
     playToken++;
     const myToken = playToken;
-    try{ synth.cancel(); }catch(_){ }
+    try { synth.cancel(); } catch (_) { }
 
     const card = flashcards[index];
     const studyKey = studySel.value;
@@ -162,27 +191,27 @@ async function renderAndPlay(){
     const repeatCount = parseInt(repeatCountSel.value, 10) || 2;
     const showTranslation = showTransChk.checked && card[transKey];
 
-    phraseEl.style.opacity=0; transEl.style.opacity=0;
-    phraseEl.style.transform='scale(0.96)';
-    transEl.style.transform='scale(0.96)';
-    await new Promise(r=>setTimeout(r,250));
+    phraseEl.style.opacity = 0; transEl.style.opacity = 0;
+    phraseEl.style.transform = 'scale(0.96)';
+    transEl.style.transform = 'scale(0.96)';
+    await new Promise(r => setTimeout(r, 250));
 
-    counterEl.textContent = `${index+1} / ${flashcards.length}`;
-    
-    if(showTranslation){
+    counterEl.textContent = `${index + 1} / ${flashcards.length}`;
+
+    if (showTranslation) {
         transEl.textContent = card[transKey];
         transEl.style.opacity = 0;
-        setTimeout(()=>{ transEl.style.opacity = 1; transEl.style.transform='scale(1)'; }, 50);
-        await speakAsync(card[transKey]||'', resolveLangCode(transKey), myToken, null, false);
-        if(playToken !== myToken) return;
+        setTimeout(() => { transEl.style.opacity = 1; transEl.style.transform = 'scale(1)'; }, 50);
+        await speakAsync(card[transKey] || '', resolveLangCode(transKey), myToken, null, false);
+        if (playToken !== myToken) return;
 
-        const delayMs = (parseFloat(pauseSel.value,10)||2)*1000;
-        await new Promise(r=>setTimeout(r, delayMs));
-        if(playToken !== myToken || isPaused) return;
+        const delayMs = (parseFloat(pauseSel.value, 10) || 2) * 1000;
+        await new Promise(r => setTimeout(r, delayMs));
+        if (playToken !== myToken || isPaused) return;
     }
-    
+
     phraseEl.textContent = card[studyKey] || '';
-    phraseEl.style.opacity=1; phraseEl.style.transform='scale(1)';
+    phraseEl.style.opacity = 1; phraseEl.style.transform = 'scale(1)';
 
     for (let i = 0; i < repeatCount; i++) {
         let voiceToUse = null;
@@ -193,52 +222,54 @@ async function renderAndPlay(){
         }
 
         await speakAsync(card[studyKey] || '', resolveLangCode(studyKey), myToken, voiceToUse, true);
-        if(playToken !== myToken) return;
-        if(i < repeatCount - 1) {
+        if (playToken !== myToken) return;
+        if (i < repeatCount - 1) {
             await new Promise(r => setTimeout(r, 500));
         }
     }
 
     clearTimeout(waitTimer);
-    const delayMs = (parseFloat(pauseSel.value,10)||2)*1000;
-    waitTimer = setTimeout(()=>{
-        if(playToken !== myToken || isPaused) return;
+    const delayMs = (parseFloat(pauseSel.value, 10) || 2) * 1000;
+    waitTimer = setTimeout(() => {
+        if (playToken !== myToken || isPaused) return;
         
-        index = (index + 1) % flashcards.length;
+        index = (index + 1);
 
-        // Si la reproducción llega al final de la lista, liberamos el Wake Lock
-        if (index === 0) {
-            releaseWakeLock();
+        // Si se llega al final de la lista, se reinicia y se libera el Wake Lock
+        if (index >= flashcards.length) {
+            index = 0;
+            manageMediaSessionState(false);
+            return;
         }
 
         renderAndPlay();
     }, delayMs);
 }
 
-document.getElementById('fileInput').addEventListener('change', (e)=>{
+document.getElementById('fileInput').addEventListener('change', (e) => {
     const file = e.target.files[0];
-    if(!file) return;
+    if (!file) return;
     fileNameEl.textContent = "📂 Archivo cargado: " + file.name;
     const reader = new FileReader();
-    reader.onload = (ev)=>{
-        try{
+    reader.onload = (ev) => {
+        try {
             const json = JSON.parse(ev.target.result);
-            if(!Array.isArray(json) || !json.length || typeof json[0]!=='object') throw 'Formato inválido';
-            flashcards = json; index=0; errorEl.textContent='';
+            if (!Array.isArray(json) || !json.length || typeof json[0] !== 'object') throw 'Formato inválido';
+            flashcards = json; index = 0; errorEl.textContent = '';
             setupSelectors();
-            introEl.style.display="none";
+            introEl.style.display = "none";
             
-            // Activamos el Wake Lock automáticamente al iniciar la reproducción.
-            requestWakeLock();
-            
+            // Activamos el Wake Lock de forma automática y se inicia la reproducción
+            isPaused = false;
+            manageMediaSessionState(true);
             renderAndPlay();
-        }catch(err){ errorEl.textContent='Error al leer JSON: '+err; }
+        } catch (err) { errorEl.textContent = 'Error al leer JSON: ' + err; }
     };
     reader.readAsText(file);
 });
 
 
-function setupSelectors(){
+function setupSelectors() {
     const keys = Object.keys(flashcards[0]);
     const preferredOrder = ['en-GB', 'fr-FR', 'es-ES'];
     const sortedKeys = [];
@@ -253,15 +284,15 @@ function setupSelectors(){
         }
     });
     
-    studySel.innerHTML=''; transSel.innerHTML='';
+    studySel.innerHTML = ''; transSel.innerHTML = '';
     
-    sortedKeys.forEach((k)=>{
-        const o=document.createElement('option');
-        o.value=k; o.textContent=k;
+    sortedKeys.forEach((k) => {
+        const o = document.createElement('option');
+        o.value = k; o.textContent = k;
         studySel.appendChild(o);
     });
     
-    if(sortedKeys.includes('en-GB')){
+    if (sortedKeys.includes('en-GB')) {
         studySel.value = 'en-GB';
     }
     
@@ -280,14 +311,14 @@ function setupSelectors(){
     transVoice.disabled = !showTransCheck.checked;
 }
 
-function refreshTransOptions(){
+function refreshTransOptions() {
     const keys = Object.keys(flashcards[0]);
     const study = studySel.value;
-    transSel.innerHTML='';
-    keys.forEach(k=>{
-        if(k!==study){
-            const o=document.createElement('option');
-            o.value=k; o.textContent=k;
+    transSel.innerHTML = '';
+    keys.forEach(k => {
+        if (k !== study) {
+            const o = document.createElement('option');
+            o.value = k; o.textContent = k;
             transSel.appendChild(o);
         }
     });
@@ -385,16 +416,16 @@ const togglePause = () => {
     isPaused = !isPaused;
     if (isPaused) {
         floatingPauseBtn.textContent = '▶';
-        try { synth.cancel(); } catch(_) { }
-        releaseWakeLock(); // Liberamos el lock al pausar
+        try { synth.cancel(); } catch (_) { }
+        manageMediaSessionState(false); // Liberamos el lock al pausar
         clearTimeout(floatingBtnTimer);
         floatingPauseBtn.classList.add('visible');
         fsBtn.classList.add('visible');
         restartBtn.classList.add('visible');
     } else {
         floatingPauseBtn.textContent = '❚❚';
-        showFloatingButtons(); 
-        requestWakeLock(); // Volvemos a solicitar el lock al reanudar
+        showFloatingButtons();
+        manageMediaSessionState(true); // Volvemos a solicitar el lock al reanudar
         renderAndPlay();
     }
 };
@@ -436,7 +467,9 @@ restartBtn.addEventListener("click", () => {
 });
 
 // Eliminamos el evento para wakeLockBtn ya que ahora es automático.
-// wakeLockBtn.addEventListener('click', ...);
+wakeLockBtn.addEventListener('click', () => {
+    alert("La gestión de pantalla ahora es automática. ¡A estudiar sin interrupciones!");
+});
 
 function isFullscreenActive(){
     return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
