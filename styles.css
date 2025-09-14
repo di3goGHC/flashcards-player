@@ -121,7 +121,6 @@ select, input[type="checkbox"], button, a.button {
 }
 
 .floating-btn {
-    position: absolute;
     cursor: pointer;
     user-select: none;
     color: #666;
@@ -145,8 +144,12 @@ select, input[type="checkbox"], button, a.button {
     opacity: 1;
     pointer-events: all;
 }
+.floating-btn.active {
+    color: #e53935;
+}
 
 #floatingPauseBtn {
+    position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -155,15 +158,8 @@ select, input[type="checkbox"], button, a.button {
     height: 80px;
 }
 
-#fsBtn {
-    bottom: 15px;
-    right: 15px;
-    font-size: 1.5rem;
-    width: 45px;
-    height: 45px;
-}
-
 #restartBtn {
+    position: absolute;
     bottom: 15px;
     left: 15px;
     font-size: 1.5rem;
@@ -197,4 +193,31 @@ select, input[type="checkbox"], button, a.button {
 /* Ajuste específico para el desplegable de velocidad (aún más pequeño) */
 #speed {
     max-width: 85px;
+}
+
+/* Contenedor para los botones flotantes inferiores */
+.bottom-floating-buttons {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+/* Aseguramos que los botones dentro de este contenedor no tengan posición absoluta */
+.bottom-floating-buttons .floating-btn {
+    position: relative;
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
+    opacity: 1;
+    pointer-events: all;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.bottom-floating-buttons .floating-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
 }
