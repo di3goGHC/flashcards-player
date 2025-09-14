@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variables de estado
     let flashcardsData = null;
     let currentPhraseIndex = 0;
-    let currentRepeat = 0;
     let isPaused = false;
     let wakeLock = null;
     let deferredPrompt = null;
@@ -217,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function restart() {
         currentPhraseIndex = 0;
-        currentRepeat = 0;
         isPaused = false;
         synth.cancel();
         releaseWakeLock();
@@ -300,6 +298,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.requestFullscreen();
             fsBtn.textContent = '🗙';
         }
+    });
+
+    ['fullscreenchange','webkitfullscreenchange','msfullscreenchange'].forEach(evt => {
+      document.addEventListener(evt, () => {
+          fsBtn.textContent = document.fullscreenElement ? '🗙' : '⛶';
+      });
     });
 
     // Cargar la lista de voces al inicio y estado guardado
