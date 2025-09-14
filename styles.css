@@ -24,6 +24,7 @@ h1 { margin: 10px; text-align: center; }
     box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
     transition: all 0.5s ease;
     text-align: center;
+    cursor: pointer;
 }
 #phrase, #translation, #intro {
     opacity: 0;
@@ -120,10 +121,10 @@ select, input[type="checkbox"], button, a.button {
     }
 }
 
+/* Estilos para los botones flotantes */
 .floating-btn {
     cursor: pointer;
     user-select: none;
-    color: #666;
     background: transparent;
     border: none;
     border-radius: 50%;
@@ -135,6 +136,10 @@ select, input[type="checkbox"], button, a.button {
     align-items: center;
     justify-content: center;
     z-index: 10;
+    font-size: 1.5rem;
+    width: 45px;
+    height: 45px;
+    color: #666;
 }
 .floating-btn:hover {
     color: #444;
@@ -143,28 +148,11 @@ select, input[type="checkbox"], button, a.button {
 .floating-btn.visible {
     opacity: 1;
     pointer-events: all;
+    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 .floating-btn.active {
     color: #e53935;
-}
-
-#floatingPauseBtn {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.5rem;
-    width: 80px;
-    height: 80px;
-}
-
-#restartBtn {
-    position: absolute;
-    bottom: 15px;
-    left: 15px;
-    font-size: 1.5rem;
-    width: 45px;
-    height: 45px;
 }
 
 .fs-lock { overflow: hidden; }
@@ -195,29 +183,32 @@ select, input[type="checkbox"], button, a.button {
     max-width: 85px;
 }
 
-/* Contenedor para los botones flotantes inferiores */
-.bottom-floating-buttons {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
+/* Contenedores para los botones flotantes dentro de la flashcard */
+.card-floating-buttons-left, .card-floating-buttons-right {
+    position: absolute;
+    bottom: 15px;
     display: flex;
     gap: 10px;
-    z-index: 1000;
+    z-index: 10;
 }
 
-/* Aseguramos que los botones dentro de este contenedor no tengan posición absoluta */
-.bottom-floating-buttons .floating-btn {
-    position: relative;
-    font-size: 1.5rem;
-    width: 45px;
-    height: 45px;
-    opacity: 1;
-    pointer-events: all;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.card-floating-buttons-left {
+    left: 15px;
 }
-.bottom-floating-buttons .floating-btn:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+
+.card-floating-buttons-right {
+    right: 15px;
+}
+
+/* Posición del botón de pausa en el centro */
+#floatingPauseBtn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.5rem;
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
 }

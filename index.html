@@ -44,7 +44,7 @@
         <button id="installBtn">Instalar</button>
     </div>
 
-    <div id="flashcard">
+    <div id="flashcard" class="flashcard-container">
         <div id="counter"></div>
         <div id="intro">
             Bienvenido a la aplicación de <b>flashcards interactivas</b>.<br><br>
@@ -57,11 +57,18 @@
 
         <div id="phrase"></div>
         <div id="translation"></div>
+        
+        <div class="card-floating-buttons-left">
+            <button id="restartBtn" class="floating-btn" title="Reiniciar">↻</button>
+            <button id="loopBtn" class="floating-btn active" title="Bucle activado">🔁</button>
+        </div>
+        
+        <div id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">▶</div>
 
-        <button id="fsBtn" class="floating-btn" title="Pantalla completa">⛶</button>
-        <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">▶</button>
-        <button id="restartBtn" class="floating-btn" title="Reiniciar">↻</button>
-        <button id="loopBtn" class="floating-btn" title="Activar/Desactivar Bucle">🔁</button>
+        <div class="card-floating-buttons-right">
+            <button id="nextBtn" class="floating-btn" title="Siguiente">⛟</button>
+            <button id="fsBtn" class="floating-btn" title="Pantalla completa">⛶</button>
+        </div>
     </div>
 
     <div id="error"></div>
