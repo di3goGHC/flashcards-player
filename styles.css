@@ -192,7 +192,7 @@ select, input[type="checkbox"], button, a.button {
 }
 
 /* Reducimos el ancho de los desplegables de texto */
-#studyLang, #studyVoice, #transLang, #transVoice, #repeatCount, #pause, #thinkTime {
+#studyLang, #studyVoice, #transLang, #transVoice, #repeatCount, #pause, #thinkTime, #repeatPause {
     max-width: 120px;
 }
 

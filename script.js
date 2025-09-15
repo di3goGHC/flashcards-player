@@ -42,7 +42,6 @@ let floatingBtnTimer = null;
 let alternateStudyVoice = null;
 let deferredPrompt = null;
 let isLoopActive = true;
-const REPEAT_PAUSE = 2;
 
 // Selectores de elementos
 const phraseEl = document.getElementById('phrase');
@@ -56,6 +55,8 @@ const transVoiceLabel = document.getElementById('transVoiceLabel');
 const transVoiceSel = document.getElementById('transVoice');
 const showTransChk = document.getElementById('showTransCheck');
 const repeatCountSel = document.getElementById('repeatCount');
+const repeatPauseLabel = document.getElementById('repeatPauseLabel');
+const repeatPauseSel = document.getElementById('repeatPause');
 const speedSel = document.getElementById('speed');
 const pauseSel = document.getElementById('pause');
 const thinkTimeLabel = document.getElementById('thinkTimeLabel');
@@ -98,7 +99,8 @@ function saveState() {
         studyVoice: studyVoiceSel.value,
         transVoice: transVoiceSel.value,
         isLoopActive: isLoopActive,
-        thinkTime: thinkTimeSel.value
+        thinkTime: thinkTimeSel.value,
+        repeatPause: repeatPauseSel.value
     };
     try {
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -126,6 +128,7 @@ function loadState() {
             transVoiceSel.value = state.transVoice;
             isLoopActive = state.isLoopActive !== undefined ? state.isLoopActive : true;
             thinkTimeSel.value = state.thinkTime;
+            repeatPauseSel.value = state.repeatPause;
 
             // Mostrar la interfaz y reanudar la reproducción
             introEl.style.display = "none";
@@ -263,7 +266,7 @@ async function renderAndPlay() {
     const card = flashcards[index];
     const studyKey = studySel.value;
     const transKey = transSel.value;
-    const repeatCount = parseInt(repeatCountSel.value, 10) || 2;
+    const repeatCount = parseInt(repeatCountSel.value, 10) || 1;
     const showTranslation = showTransChk.checked && card[transKey];
 
     phraseEl.style.opacity = 0; transEl.style.opacity = 0;
@@ -299,7 +302,8 @@ async function renderAndPlay() {
         await speakAsync(card[studyKey] || '', resolveLangCode(studyKey), myToken, voiceToUse, true);
         if (playToken !== myToken) return;
         if (i < repeatCount - 1) {
-            await new Promise(r => setTimeout(r, REPEAT_PAUSE * 1000));
+            const repeatPauseTime = (parseFloat(repeatPauseSel.value, 10) || 5) * 1000;
+            await new Promise(r => setTimeout(r, repeatPauseTime));
         }
     }
 
@@ -378,6 +382,7 @@ function setupSelectors() {
     transLang.disabled = !showTransCheck.checked;
     transVoice.disabled = !showTransCheck.checked;
     thinkTimeSel.disabled = !showTransCheck.checked;
+    repeatPauseSel.disabled = (parseInt(repeatCountSel.value, 10) === 1);
 }
 
 function refreshTransOptions() {
@@ -642,9 +647,7 @@ fsBtn.addEventListener('click', async (e)=>{
 });
 
 repeatCountSel.addEventListener('change', () => {
-    if (repeatCountSel.value === '1') {
-        studyVoiceSel.disabled = false;
-    }
+    repeatPauseSel.disabled = (parseInt(repeatCountSel.value, 10) === 1);
     renderAndPlay();
     saveState(); // Guardar el estado al cambiar la configuración de repetición
 });
@@ -678,6 +681,11 @@ transVoiceSel.addEventListener('change', () => {
 });
 
 thinkTimeSel.addEventListener('change', () => {
+    renderAndPlay();
+    saveState();
+});
+
+repeatPauseSel.addEventListener('change', () => {
     renderAndPlay();
     saveState();
 });
