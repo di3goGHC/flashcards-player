@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.example.flashcardplayer",
+    "sha256_cert_fingerprints": ["47:29:24:A8:2B:46:17:2C:66:F3:3A:C5:84:69:BE:19:F4:A7:6D:52:54:22:B3:9B:1A:5C:2B:46:62:88:EC:38"]
+  }
+}]
