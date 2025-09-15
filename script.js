@@ -256,6 +256,11 @@ async function renderAndPlay() {
 
     if (!isPaused) {
         manageMediaSessionState(true);
+
+        // AÑADIR ESTA LÍNEA AQUÍ
+        if (typeof Android !== 'undefined' && Android !== null) {
+            Android.startForegroundService();
+        }
     } else {
         return;
     }
@@ -545,6 +550,12 @@ const togglePause = () => {
         floatingPauseBtn.querySelector('i').className = 'fa-solid fa-play';
         try { synth.cancel(); } catch (_) { }
         manageMediaSessionState(false);
+
+        // AÑADIR ESTA LÍNEA AQUÍ
+        if (typeof Android !== 'undefined' && Android !== null) {
+            Android.stopForegroundService();
+        }
+
         clearTimeout(floatingBtnTimer);
         const floatingButtons = document.querySelectorAll('.floating-btn');
         floatingButtons.forEach(btn => btn.classList.add('visible'));
@@ -552,6 +563,12 @@ const togglePause = () => {
         floatingPauseBtn.querySelector('i').className = 'fa-solid fa-pause';
         showFloatingButtons();
         manageMediaSessionState(true);
+
+        // AÑADIR ESTA LÍNEA AQUÍ
+        if (typeof Android !== 'undefined' && Android !== null) {
+            Android.startForegroundService();
+        }
+
         renderAndPlay();
     }
     saveState(); // Guardamos el estado al pausar/reanudar
