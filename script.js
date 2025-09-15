@@ -58,6 +58,7 @@ const repeatCountSel = document.getElementById('repeatCount');
 const repeatPauseLabel = document.getElementById('repeatPauseLabel');
 const repeatPauseSel = document.getElementById('repeatPause');
 const speedSel = document.getElementById('speed');
+const pauseLabel = document.getElementById('pauseLabel');
 const pauseSel = document.getElementById('pause');
 const thinkTimeLabel = document.getElementById('thinkTimeLabel');
 const thinkTimeSel = document.getElementById('thinkTime');
@@ -308,7 +309,7 @@ async function renderAndPlay() {
     }
 
     clearTimeout(waitTimer);
-    const delayMs = (parseFloat(pauseSel.value, 10) || 2) * 1000;
+    const delayMs = (parseFloat(pauseSel.value, 10) || 3) * 1000;
     waitTimer = setTimeout(() => {
         if (playToken !== myToken || isPaused) return;
         
@@ -686,6 +687,11 @@ thinkTimeSel.addEventListener('change', () => {
 });
 
 repeatPauseSel.addEventListener('change', () => {
+    renderAndPlay();
+    saveState();
+});
+
+pauseSel.addEventListener('change', () => {
     renderAndPlay();
     saveState();
 });
