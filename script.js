@@ -125,21 +125,29 @@ function loadState() {
             pauseSel.value = state.pause;
             showTransChk.checked = state.showTrans;
             repeatCountSel.value = state.repeatCount;
-            studyVoiceSel.value = state.studyVoice;
-            transVoiceSel.value = state.transVoice;
+            // La asignación de voces se hace más tarde, después de que estén cargadas
             isLoopActive = state.isLoopActive !== undefined ? state.isLoopActive : true;
             thinkTimeSel.value = state.thinkTime;
             repeatPauseSel.value = state.repeatPause;
 
             // Mostrar la interfaz y reanudar la reproducción
             introEl.style.display = "none";
-            setupSelectors(); // Para asegurar que los selectores se carguen correctamente
+            // Llama a populate selectors para que se carguen las opciones de idioma
+            setupSelectors();
             updateLoopButton();
+            // Restaura las voces guardadas una vez que los selectores están llenos
+            if (state.studyVoice) studyVoiceSel.value = state.studyVoice;
+            if (state.transVoice) transVoiceSel.value = state.transVoice;
+            
             if (!isPaused) {
                 renderAndPlay();
             } else {
                 togglePause(); // Para actualizar el botón de pausa y el estado
             }
+        } else {
+            // Si no hay estado guardado, inicializa los selectores
+            setupSelectors();
+            updateLoopButton();
         }
     } catch (e) {
         console.error("Error al cargar el estado desde localStorage:", e);
@@ -382,8 +390,10 @@ function setupSelectors() {
         transSel.value = 'fr-FR';
     }
     
-    populateStudyVoiceSelector();
-    populateVoiceSelector();
+    // Las llamadas a estas funciones se han movido al evento onvoiceschanged
+    // para evitar el error de "undefined"
+    // populateStudyVoiceSelector();
+    // populateVoiceSelector();
     studyVoiceSel.disabled = false;
     transLang.disabled = !showTransCheck.checked;
     transVoice.disabled = !showTransCheck.checked;
@@ -537,9 +547,13 @@ function prevCard() {
 transSel.addEventListener('change', populateVoiceSelector);
 studySel.addEventListener('change', populateStudyVoiceSelector);
 
+// ESTE ES EL CAMBIO CLAVE: Escucha el evento de cambio de voces
 synth.onvoiceschanged = () => {
     populateStudyVoiceSelector();
     populateVoiceSelector();
+    // Vuelve a cargar el estado para restaurar la voz seleccionada
+    // una vez que los selectores están llenos.
+    loadState(); 
 };
 
 
@@ -730,11 +744,11 @@ document.addEventListener('visibilitychange', () => {
 
 // Cargar el estado al iniciar la aplicación
 document.addEventListener('DOMContentLoaded', () => {
-    loadState();
-    
-    // Si no se carga un estado previo, se inician los selectores y el botón de bucle.
-    if (!localStorage.getItem(STATE_KEY)) {
-        setupSelectors();
-        updateLoopButton();
+    // Si no hay voces cargadas, la llamada inicial a loadState se realizará
+    // después del evento onvoiceschanged.
+    if (synth.getVoices().length > 0) {
+        loadState();
+    } else {
+        // En este caso, la llamada a loadState se hará desde el onvoiceschanged
     }
 });
