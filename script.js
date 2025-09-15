@@ -42,6 +42,7 @@ let floatingBtnTimer = null;
 let alternateStudyVoice = null;
 let deferredPrompt = null;
 let isLoopActive = true;
+const REPEAT_PAUSE = 2;
 
 // Selectores de elementos
 const phraseEl = document.getElementById('phrase');
@@ -57,6 +58,8 @@ const showTransChk = document.getElementById('showTransCheck');
 const repeatCountSel = document.getElementById('repeatCount');
 const speedSel = document.getElementById('speed');
 const pauseSel = document.getElementById('pause');
+const thinkTimeLabel = document.getElementById('thinkTimeLabel');
+const thinkTimeSel = document.getElementById('thinkTime');
 const counterEl = document.getElementById('counter');
 const errorEl = document.getElementById('error');
 const restartBtn = document.getElementById('restartBtn');
@@ -94,7 +97,8 @@ function saveState() {
         repeatCount: repeatCountSel.value,
         studyVoice: studyVoiceSel.value,
         transVoice: transVoiceSel.value,
-        isLoopActive: isLoopActive
+        isLoopActive: isLoopActive,
+        thinkTime: thinkTimeSel.value
     };
     try {
         localStorage.setItem(STATE_KEY, JSON.stringify(state));
@@ -121,6 +125,7 @@ function loadState() {
             studyVoiceSel.value = state.studyVoice;
             transVoiceSel.value = state.transVoice;
             isLoopActive = state.isLoopActive !== undefined ? state.isLoopActive : true;
+            thinkTimeSel.value = state.thinkTime;
 
             // Mostrar la interfaz y reanudar la reproducción
             introEl.style.display = "none";
@@ -275,8 +280,8 @@ async function renderAndPlay() {
         await speakAsync(card[transKey] || '', resolveLangCode(transKey), myToken, null, false);
         if (playToken !== myToken) return;
 
-        const delayMs = (parseFloat(pauseSel.value, 10) || 2) * 1000;
-        await new Promise(r => setTimeout(r, delayMs));
+        const thinkDelayMs = (parseFloat(thinkTimeSel.value, 10) || 2) * 1000;
+        await new Promise(r => setTimeout(r, thinkDelayMs));
         if (playToken !== myToken || isPaused) return;
     }
 
@@ -294,7 +299,7 @@ async function renderAndPlay() {
         await speakAsync(card[studyKey] || '', resolveLangCode(studyKey), myToken, voiceToUse, true);
         if (playToken !== myToken) return;
         if (i < repeatCount - 1) {
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, REPEAT_PAUSE * 1000));
         }
     }
 
@@ -372,6 +377,7 @@ function setupSelectors() {
     studyVoiceSel.disabled = false;
     transLang.disabled = !showTransCheck.checked;
     transVoice.disabled = !showTransCheck.checked;
+    thinkTimeSel.disabled = !showTransCheck.checked;
 }
 
 function refreshTransOptions() {
@@ -647,6 +653,7 @@ showTransCheck.addEventListener('change', () => {
     const isChecked = showTransCheck.checked;
     transLang.disabled = !isChecked;
     transVoice.disabled = !isChecked;
+    thinkTimeSel.disabled = !isChecked;
     saveState(); // Guardar el estado al activar/desactivar la traducción
 });
 
@@ -668,6 +675,11 @@ studyVoiceSel.addEventListener('change', () => {
 transVoiceSel.addEventListener('change', () => {
     renderAndPlay();
     saveState(); // Guardar el estado al cambiar la voz de traducción
+});
+
+thinkTimeSel.addEventListener('change', () => {
+    renderAndPlay();
+    saveState();
 });
 
 // Guardar el estado cuando la página se oculta (por ejemplo, al apagar la panntalla)

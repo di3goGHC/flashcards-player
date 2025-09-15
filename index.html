@@ -9,7 +9,6 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     <link rel="shortcut icon" href="/favicon.ico">
     <link rel="stylesheet" href="styles.css">
-    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <script>
@@ -60,7 +59,6 @@
         <div id="phrase"></div>
         <div id="translation"></div>
 
-        <!-- Contenedor para botones en la esquina inferior izquierda -->
         <div class="card-floating-buttons-left">
             <button id="restartBtn" class="floating-btn" title="Reiniciar">
                 <i class="fa-solid fa-rotate-left"></i>
@@ -70,16 +68,13 @@
             </button>
         </div>
 
-        <!-- Contenedor para botones en el centro -->
         <div class="card-floating-buttons-center">
-             <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">
-                 <i class="fa-solid fa-play"></i>
-             </button>
+               <button id="floatingPauseBtn" class="floating-btn" title="Pausar/Reproducir">
+                   <i class="fa-solid fa-play"></i>
+               </button>
         </div>
 
-        <!-- Contenedor para botones en la esquina inferior derecha -->
         <div class="card-floating-buttons-right">
-            <!-- Nuevo botón para retroceder -->
             <button id="prevBtn" class="floating-btn" title="Anterior">
                 <i class="fa-solid fa-backward-step"></i>
             </button>
@@ -143,6 +138,20 @@
             </label>
             <label id="transVoiceLabel" style="display: none;">🗣️ Voz:
                 <select id="transVoice"></select>
+            </label>
+            
+            <label id="thinkTimeLabel">🤔 Pensar (s):
+                <select id="thinkTime">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                </select>
             </label>
             
             <label>👁️
