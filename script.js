@@ -696,6 +696,11 @@ pauseSel.addEventListener('change', () => {
     saveState();
 });
 
+speedSel.addEventListener('change', () => {
+    renderAndPlay();
+    saveState();
+});
+
 // Guardar el estado cuando la página se oculta (por ejemplo, al apagar la panntalla)
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
